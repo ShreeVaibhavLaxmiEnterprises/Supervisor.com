@@ -3,80 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nirmal Enterprise - Daily Report</title>
+    <title> SHREE VAIBHAV LAXMI Enterprise - Full Report</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f4f4;
-        }
-        .container {
-            max_width: 600px;
-            margin: 0 auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 5px;
-        }
-        .sub-header {
-            text-align: center;
-            color: #7f8c8d;
-            font-size: 14px;
-            margin-bottom: 20px;
-        }
-        .section-title {
-            background-color: #2c3e50;
-            color: white;
-            padding: 10px;
-            margin-top: 20px;
-            border-radius: 4px;
-        }
-        label {
-            display: block;
-            margin-top: 10px;
-            font-weight: bold;
-        }
-        input, select, textarea {
-            width: 100%;
-            padding: 10px;
-            margin-top: 5px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box; /* Ensures padding doesn't affect width */
-        }
-        .row {
-            display: flex;
-            gap: 10px;
-        }
-        .col {
-            flex: 1;
-        }
-        button {
-            width: 100%;
-            padding: 15px;
-            background-color: #e67e22; /* Construction Orange color */
-            color: white;
-            border: none;
-            font-size: 16px;
-            margin-top: 20px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        button:hover {
-            background-color: #d35400;
-        }
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; text-align: center; margin-bottom: 5px; }
+        .sub-header { text-align: center; color: #7f8c8d; font-size: 14px; margin-bottom: 20px; }
+        .section-title { background-color: #2c3e50; color: white; padding: 10px; margin-top: 25px; border-radius: 4px; font-weight: bold; }
+        label { display: block; margin-top: 10px; font-weight: bold; font-size: 0.9em; }
+        input, select, textarea { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .row { display: flex; gap: 10px; }
+        .col { flex: 1; }
         
-        /* Printing Styles - Hide button when printing */
+        /* Table Styles */
+        .table-container { overflow-x: auto; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; font-size: 13px; }
+        th { background-color: #eee; }
+        .btn-add { background-color: #27ae60; padding: 8px; font-size: 12px; margin-top: 10px; width: auto; display: inline-block; }
+        
+        button { width: 100%; padding: 15px; background-color: #e67e22; color: white; border: none; font-size: 16px; margin-top: 20px; cursor: pointer; border-radius: 4px; }
+        button:hover { background-color: #d35400; }
+
         @media print {
-            button { display: none; }
+            button, .btn-add { display: none; }
             body { background-color: white; }
-            .container { box-shadow: none; border: none; }
+            .container { box-shadow: none; border: none; max-width: 100%; }
+            input, textarea, select { border: none; border-bottom: 1px solid #000; font-family: monospace; }
         }
     </style>
 </head>
@@ -88,72 +41,89 @@
 
     <form id="reportForm">
         
-        <div class="section-title">1. Site Details</div>
         <div class="row">
-            <div class="col">
-                <label>Date:</label>
-                <input type="date" id="date" required>
-            </div>
-            <div class="col">
-                <label>Shift:</label>
-                <select>
-                    <option>Day</option>
-                    <option>Night</option>
-                </select>
-            </div>
+            <div class="col"><label>Date:</label><input type="date" id="mainDate"></div>
+            <div class="col"><label>Supervisor:</label><input type="text" placeholder="Name"></div>
         </div>
-        
-        <label>Site Name:</label>
-        <input type="text" placeholder="e.g. Building A - Ghatkopar" required>
+        <label>Site Name:</label><input type="text" placeholder="e.g. Building A">
 
-        <label>Supervisor Name:</label>
-        <input type="text" placeholder="Enter Name">
-
-        <div class="section-title">2. Labour Strength (Manpower)</div>
-        
-        <div class="row">
-            <div class="col">
-                <label>Carpenters:</label>
-                <input type="number" id="carpenter" value="0" oninput="calculateTotal()">
-            </div>
-            <div class="col">
-                <label>Fitters:</label>
-                <input type="number" id="fitter" value="0" oninput="calculateTotal()">
-            </div>
+        <div class="section-title">2. Labour Muster Roll & Payment</div>
+        <div class="table-container">
+            <table id="labourTable">
+                <thead>
+                    <tr>
+                        <th width="15%">Date</th>
+                        <th width="20%">Worker Name</th>
+                        <th width="15%">Type</th>
+                        <th width="10%">Rate (₹)</th>
+                        <th width="10%">Att.</th>
+                        <th width="15%">Adv. (₹)</th>
+                        <th width="15%">Payable (₹)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
         </div>
+        <button type="button" class="btn-add" onclick="addWorkerRow()">+ Add Worker Row</button>
 
-        <div class="row">
-            <div class="col">
-                <label>Helpers:</label>
-                <input type="number" id="helper" value="0" oninput="calculateTotal()">
-            </div>
-            <div class="col">
-                <label>TOTAL:</label>
-                <input type="number" id="total" value="0" readonly style="background-color: #eee; font-weight:bold;">
-            </div>
-        </div>
+        <div class="section-title">3. Material Report</div>
+        <textarea rows="3" placeholder="Example: 50 Ply Sheets In, 20 Props Out..."></textarea>
 
-        <div class="section-title">3. Material Report (In/Out)</div>
-        <textarea rows="3" placeholder="Example: 50 Plywood Sheets Received (Challan 102)"></textarea>
+        <div class="section-title">4. Work Done Description</div>
+        <textarea rows="3" placeholder="Detail of work completed today..."></textarea>
 
-        <div class="section-title">4. Work Done Today</div>
-        <textarea rows="4" placeholder="Example: 2nd Floor Slab shuttering completed 50%..."></textarea>
+        <div class="section-title">5. ISSUES / REQUIREMENTS</div>
+        <textarea rows="3" placeholder="Example: Need more nails, crane required tomorrow, shortage of helpers..."></textarea>
 
-        <button type="button" onclick="window.print()">SAVE AS PDF / PRINT</button>
+        <button type="button" onclick="window.print()">SAVE AS PDF</button>
     </form>
 </div>
 
 <script>
-    // Automatic Date Setting
-    document.getElementById('date').valueAsDate = new Date();
+    // Set Today's Date
+    document.getElementById('mainDate').valueAsDate = new Date();
 
-    // Auto Calculate Labour Total
-    function calculateTotal() {
-        let c = parseInt(document.getElementById('carpenter').value) || 0;
-        let f = parseInt(document.getElementById('fitter').value) || 0;
-        let h = parseInt(document.getElementById('helper').value) || 0;
+    // Function to Add New Row
+    function addWorkerRow() {
+        const table = document.getElementById("labourTable").getElementsByTagName('tbody')[0];
+        const newRow = table.insertRow();
         
-        document.getElementById('total').value = c + f + h;
+        // Default Date
+        const today = new Date().toISOString().split('T')[0];
+
+        newRow.innerHTML = `
+            <td><input type="date" value="${today}" style="font-size:11px;"></td>
+            <td><input type="text" placeholder="Name"></td>
+            <td>
+                <select style="font-size:11px;">
+                    <option>Carpenter</option>
+                    <option>Fitter</option>
+                    <option>Helper</option>
+                </select>
+            </td>
+            <td><input type="number" class="rate" oninput="calcRow(this)" placeholder="0"></td>
+            <td><input type="number" class="att" oninput="calcRow(this)" placeholder="1" step="0.5"></td>
+            <td><input type="number" class="adv" oninput="calcRow(this)" placeholder="0"></td>
+            <td><input type="number" class="total" readonly style="background:#eee; font-weight:bold;"></td>
+        `;
+    }
+
+    // Function to Calculate Payment: (Rate * Attendance) - Advance
+    function calcRow(element) {
+        const row = element.closest('tr');
+        const rate = parseFloat(row.querySelector('.rate').value) || 0;
+        const att = parseFloat(row.querySelector('.att').value) || 0;
+        const adv = parseFloat(row.querySelector('.adv').value) || 0;
+
+        const total = (rate * att) - adv;
+        row.querySelector('.total').value = total;
+    }
+
+    // Add 2 empty rows by default when page loads
+    window.onload = function() {
+        addWorkerRow();
+        addWorkerRow();
     }
 </script>
 
