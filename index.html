@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>ALG Construction Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root{--blue:#1e88e5;--bg:#f4f9ff}
+body{margin:0;font-family:Segoe UI;background:var(--bg)}
+.container{max-width:1200px;margin:auto;padding:15px}
+h1{text-align:center;color:var(--blue)}
+.card{background:#fff;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,.08);margin-bottom:20px}
+.card h3{background:var(--blue);color:#fff;padding:12px;margin:0;border-radius:10px 10px 0 0}
+.row{display:flex;flex-wrap:wrap;gap:12px;padding:12px}
+.col{flex:1;min-width:180px}
+input,select{padding:8px;border:1px solid #ccc;border-radius:6px;width:100%}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{border:1px solid #ddd;padding:8px;text-align:center}
+th{background:#e3f2fd}
+button{background:var(--blue);color:#fff;border:none;padding:8px 14px;border-radius:6px;cursor:pointer}
+button:hover{opacity:.9}
+.tabbar{display:flex;gap:10px;margin-bottom:15px}
+.tabbar button{flex:1}
+.hide{display:none}
+.history{max-height:260px;overflow:auto}
+</style>
+</head>
+
+<body>
+<div class="container">
+<h1>ALG Construction Tracking System</h1>
+
+<div class="tabbar">
+<button onclick="showTab(1)">📝 Daily Entry</button>
+<button onclick="showTab(2)">📊 Reports</button>
+<button onclick="showTab(3)">👷 Worker Master</button>
+<button onclick="showTab(4)">📄 Salary Slip</button>
+</div>
+
+<!-- TAB 1 DAILY ENTRY -->
+<div id="tab1">
+<div class="card">
+<h3>Basic Details</h3>
+<div class="row">
+<div class="col"><input type="date" id="date"></div>
+<div class="col"><input id="site" placeholder="Site Name"></div>
+<div class="col"><input placeholder="Supervisor"></div>
+</div>
+</div>
+
+<div class="card">
+<h3>Labour Details (Auto Rate)</h3>
+<table id="labourTable">
+<tr>
+<th>Name</th><th>Type</th><th>Rate</th><th>Att</th><th>Adv</th><th>Pay</th><th>X</th>
+</tr>
+</table>
+<div style="padding:12px"><button onclick="addWorker()">+ Add Worker</button></div>
+</div>
+
+<button onclick="saveRecord()">💾 Save Report</button>
+<button onclick="window.print()">📄 Download PDF</button>
+<button onclick="exportExcel()">📊 Export Excel</button>
+</div>
+
+<!-- TAB 2 REPORTS -->
+<div id="tab2" class="hide">
+<div class="card">
+<h3>Date Wise Filter</h3>
+<div class="row">
+<input type="date" id="filterDate" onchange="loadHistory()">
+<button onclick="clearFilter()">Clear</button>
+</div>
+</div>
+
+<div class="card">
+<h3>Saved Labour Records</h3>
+<div class="history">
+<table>
+<tr>
+<th>Date</th><th>Site</th><th>Name</th><th>Type</th><th>Rate</th><th>Att</th><th>Adv</th><th>Pay</th>
+</tr>
+<tbody id="historyData"></tbody>
+</table>
+</div>
+</div>
+
+<div class="card">
+<h3>Monthly Summary</h3>
+<div class="row"><input type="month" id="monthFilter" onchange="loadMonthly()"></div>
+<table>
+<tr><th>Month</th><th>Total Days</th><th>Total Cost ₹</th></tr>
+<tbody id="monthlyData"></tbody>
+</table>
+</div>
+</div>
+
+<!-- TAB 3 WORKER MASTER -->
+<div id="tab3" class="hide">
+<div class="card">
+<h3>Worker Master (Edit)</h3>
+<div class="row">
+<input id="wmName" placeholder="Worker Name">
+<input id="wmType" placeholder="Type">
+<input id="wmRate" type="number" placeholder="Rate">
+<button onclick="addMaster()">Add</button>
+</div>
+<table>
+<tr><th>Name</th><th>Type</th><th>Rate</th><th>X</th></tr>
+<tbody id="wmTable"></tbody>
+</table>
+</div>
+</div>
+
+<!-- TAB 4 SALARY SLIP -->
+<div id="tab4" class="hide">
+<div class="card">
+<h3>Salary Slip (PDF)</h3>
+<div class="row">
+<select id="slipWorker"></select>
+<input type="month" id="slipMonth">
+<button onclick="generateSlip()">Generate</button>
+</div>
+<div id="slipArea"></div>
+</div>
+</div>
+
+</div>
+
+<script>
+/* TABS */
+function showTab(n){
+ [tab1,tab2,tab3,tab4].forEach(t=>t.classList.add("hide"));
+ document.getElementById("tab"+n).classList.remove("hide");
+}
+
+/* WORKER MASTER */
+let workerMaster=JSON.parse(localStorage.getItem("workerMaster"))||[];
+function saveWM(){localStorage.setItem("workerMaster",JSON.stringify(workerMaster));renderWM();}
+
+function addMaster(){
+ workerMaster.push({name:wmName.value,type:wmType.value,rate:wmRate.value});
+ saveWM(); wmName.value=wmType.value=wmRate.value="";
+}
+function deleteWM(i){workerMaster.splice(i,1);saveWM();}
+function renderWM(){
+ wmTable.innerHTML=workerMaster.map((w,i)=>`
+ <tr><td>${w.name}</td><td>${w.type}</td><td>${w.rate}</td>
+ <td><button onclick="deleteWM(${i})">X</button></td></tr>`).join("");
+ slipWorker.innerHTML=workerMaster.map(w=>`<option>${w.name}</option>`).join("");
+}
+renderWM();
+
+/* LABOUR ENTRY */
+function addWorker(){
+ let r=labourTable.insertRow();
+ let opt=workerMaster.map(w=>`<option value="${w.name}">`).join("");
+ r.innerHTML=`
+ <td><input list="wm" onchange="autoFill(this)"><datalist id="wm">${opt}</datalist></td>
+ <td class="type"></td><td class="rate"></td>
+ <td><input type="number" value="1" oninput="calc(this)"></td>
+ <td><input type="number" value="0" oninput="calc(this)"></td>
+ <td class="pay">0</td>
+ <td><button onclick="this.parentElement.parentElement.remove()">X</button></td>`;
+}
+
+function autoFill(e){
+ let r=e.parentElement.parentElement;
+ let w=workerMaster.find(x=>x.name===e.value);
+ if(w){r.querySelector(".type").innerText=w.type;r.querySelector(".rate").innerText=w.rate;}
+ calc(e);
+}
+function calc(e){
+ let r=e.parentElement.parentElement;
+ let rate=Number(r.querySelector(".rate").innerText||0);
+ let att=r.cells[3].querySelector("input").value;
+ let adv=r.cells[4].querySelector("input").value;
+ r.querySelector(".pay").innerText=(rate*att)-adv;
+}
+
+/* SAVE & REPORT */
+function saveRecord(){
+ let d=JSON.parse(localStorage.getItem("labourData"))||[];
+ document.querySelectorAll("#labourTable tr").forEach((r,i)=>{
+ if(i===0)return;
+ d.push({
+ date:date.value,site:site.value,
+ name:r.cells[0].querySelector("input").value,
+ type:r.querySelector(".type").innerText,
+ rate:r.querySelector(".rate").innerText,
+ att:r.cells[3].querySelector("input").value,
+ adv:r.cells[4].querySelector("input").value,
+ pay:r.querySelector(".pay").innerText
+ });
+ });
+ localStorage.setItem("labourData",JSON.stringify(d));
+ alert("Saved ✅");
+}
+
+/* HISTORY */
+function loadHistory(){
+ let d=JSON.parse(localStorage.getItem("labourData"))||[];
+ let f=filterDate.value;
+ historyData.innerHTML=d.filter(x=>!f||x.date===f).map(x=>`
+ <tr><td>${x.date}</td><td>${x.site}</td><td>${x.name}</td>
+ <td>${x.type}</td><td>${x.rate}</td><td>${x.att}</td>
+ <td>${x.adv}</td><td>${x.pay}</td></tr>`).join("");
+}
+function clearFilter(){filterDate.value="";loadHistory();}
+
+/* MONTHLY */
+function loadMonthly(){
+ let d=JSON.parse(localStorage.getItem("labourData"))||[];
+ let m=monthFilter.value,days=0,cost=0;
+ d.forEach(x=>{if(x.date.startsWith(m)){days+=Number(x.att);cost+=Number(x.pay);}});
+ monthlyData.innerHTML=m?`<tr><td>${m}</td><td>${days}</td><td>${cost}</td></tr>`:"";
+}
+
+/* SALARY SLIP */
+function generateSlip(){
+ let d=JSON.parse(localStorage.getItem("labourData"))||[];
+ let w=slipWorker.value,m=slipMonth.value;
+ let total=0,days=0;
+ d.forEach(x=>{if(x.name===w && x.date.startsWith(m)){total+=Number(x.pay);days+=Number(x.att);}});
+ slipArea.innerHTML=`
+ <div class="card"><h3>Salary Slip</h3>
+ <p><b>Worker:</b> ${w}</p>
+ <p><b>Month:</b> ${m}</p>
+ <p><b>Total Days:</b> ${days}</p>
+ <p><b>Total Pay:</b> ₹${total}</p>
+ <button onclick="window.print()">Print / PDF</button>
+ </div>`;
+}
+
+/* EXPORT */
+function exportExcel(){
+ let d=JSON.parse(localStorage.getItem("labourData"))||[];
+ let csv="Date,Site,Name,Type,Rate,Att,Adv,Pay\n";
+ d.forEach(x=>csv+=`${x.date},${x.site},${x.name},${x.type},${x.rate},${x.att},${x.adv},${x.pay}\n`);
+ let a=document.createElement("a");
+ a.href=URL.createObjectURL(new Blob([csv]));
+ a.download="ALG_Labour_Report.csv";a.click();
+}
+</script>
+</body>
+</html>
