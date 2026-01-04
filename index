@@ -1,0 +1,77 @@
+from fpdf import FPDF
+
+class PDF(FPDF):
+    def header(self):
+        # Title
+        self.set_font('Arial', 'B', 16)
+        self.cell(0, 10, 'NIRMAL ENTERPRISE', 0, 1, 'C')
+        self.set_font('Arial', 'I', 10)
+        self.cell(0, 5, 'Shuttering Contractor - Ghatkopar, Mumbai | Mob: 9167004003', 0, 1, 'C')
+        self.ln(10)
+
+    def footer(self):
+        self.set_y(-15)
+        self.set_font('Arial', 'I', 8)
+        self.cell(0, 10, 'Page ' + str(self.page_no()), 0, 0, 'C')
+
+def create_dpr():
+    pdf = PDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+
+    # Site Details
+    pdf.set_fill_color(200, 220, 255)
+    pdf.cell(0, 10, " DAILY PROGRESS REPORT ", 1, 1, 'C', 1)
+    pdf.ln(5)
+    
+    pdf.cell(95, 10, "Date: _______________", 1)
+    pdf.cell(95, 10, "Site: _______________", 1, 1)
+    pdf.cell(95, 10, "Supervisor: _______________", 1)
+    pdf.cell(95, 10, "Weather: Sun / Rain", 1, 1)
+    pdf.ln(5)
+
+    # Labour Section
+    pdf.set_font("Arial", 'B', 12)
+    pdf.cell(0, 10, "1. LABOUR STRENGTH", 0, 1)
+    pdf.set_font("Arial", size=12)
+    pdf.cell(60, 10, "Category", 1)
+    pdf.cell(40, 10, "Count", 1)
+    pdf.cell(90, 10, "Remarks", 1, 1)
+    
+    categories = ['Carpenters', 'Fitters', 'Helpers', 'Supervisors']
+    for cat in categories:
+        pdf.cell(60, 10, cat, 1)
+        pdf.cell(40, 10, "", 1)
+        pdf.cell(90, 10, "", 1, 1)
+    pdf.ln(5)
+
+    # Material Section
+    pdf.set_font("Arial", 'B', 12)
+    pdf.cell(0, 10, "2. MATERIAL RECEIVED (IN)", 0, 1)
+    pdf.set_font("Arial", size=12)
+    pdf.cell(95, 10, "Item Name", 1)
+    pdf.cell(30, 10, "Qty", 1)
+    pdf.cell(65, 10, "Challan No", 1, 1)
+    for i in range(3):
+        pdf.cell(95, 10, "", 1)
+        pdf.cell(30, 10, "", 1)
+        pdf.cell(65, 10, "", 1, 1)
+    pdf.ln(5)
+
+    # Work Done
+    pdf.set_font("Arial", 'B', 12)
+    pdf.cell(0, 10, "3. WORK DONE DESCRIPTION", 0, 1)
+    pdf.set_font("Arial", size=12)
+    pdf.multi_cell(0, 10, "\n\n\n", 1) # Empty box
+    pdf.ln(5)
+    
+    # Signature
+    pdf.ln(10)
+    pdf.cell(95, 10, "Supervisor Sign: ____________", 0)
+    pdf.cell(95, 10, "Engineer Sign: ____________", 0, 1)
+
+    pdf.output("Nirmal_Enterprise_DPR.pdf")
+    print("PDF Successfully Created!")
+
+# Is code ko run karne ke liye 'pip install fpdf' karein
+create_dpr()
