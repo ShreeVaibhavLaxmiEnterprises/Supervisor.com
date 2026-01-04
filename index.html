@@ -3,187 +3,267 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SHREE VAIBHAV LAXMI ENTERPRISES- Ultimate System</title>
+    <title>SHREE VAIBHAV LAXMI ENTERPRISES - Pro System</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; background-color: #f4f6f9; }
-        .container { max-width: 900px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        /* --- PREMIUM CSS STYLING --- */
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 15px; background-color: #eef2f5; color: #333; }
+        .container { max-width: 950px; margin: 0 auto; background: transparent; }
         
-        h1 { color: #2c3e50; text-align: center; margin: 0; }
-        .sub-header { text-align: center; color: #7f8c8d; font-size: 14px; margin-bottom: 15px; }
+        /* Header Card */
+        .header-card { background: linear-gradient(135deg, #2c3e50, #4ca1af); color: white; padding: 25px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        h1 { margin: 0; font-size: 24px; letter-spacing: 1px; text-transform: uppercase; }
+        .sub-header { font-size: 14px; opacity: 0.9; margin-top: 5px; }
 
-        /* TABS */
-        .tabs { display: flex; border-bottom: 2px solid #ddd; margin-bottom: 20px; }
-        .tab-btn { flex: 1; padding: 15px; border: none; background: #f1f1f1; cursor: pointer; font-size: 16px; font-weight: bold; }
-        .tab-btn.active { background: #3498db; color: white; }
+        /* Tabs */
+        .tabs { display: flex; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .tab-btn { flex: 1; padding: 15px; border: none; background: white; cursor: pointer; font-size: 16px; font-weight: 600; color: #555; transition: 0.3s; }
+        .tab-btn.active { background: #2980b9; color: white; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* SECTIONS & INPUTS */
-        .section-title { background-color: #2c3e50; color: white; padding: 10px; margin-top: 20px; border-radius: 4px; font-weight: bold; }
-        .summary-box { background-color: #e8f6f3; border: 1px solid #1abc9c; padding: 10px; margin-top: 10px; display: flex; justify-content: space-around; font-weight: bold; color: #16a085; }
+        /* Section Cards */
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; border-left: 5px solid #2980b9; }
+        .card-title { font-size: 18px; font-weight: bold; color: #2c3e50; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; font-size: 13px; }
-        th { background-color: #eee; }
-        input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        /* Material & Work Specific Colors */
+        .card-material { border-left-color: #e67e22; }
+        .card-work { border-left-color: #27ae60; }
+
+        /* Form Elements */
+        label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 13px; color: #555; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 14px; transition: 0.3s; background: #f9f9f9; }
+        input:focus, select:focus, textarea:focus { border-color: #3498db; background: white; outline: none; }
         
-        /* PHOTOS */
-        .photo-grid { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-        .photo-preview { width: 100px; height: 100px; object-fit: cover; border: 1px solid #ccc; border-radius: 4px; }
+        /* Table */
+        .table-wrapper { overflow-x: auto; border-radius: 8px; border: 1px solid #eee; }
+        table { width: 100%; border-collapse: collapse; min-width: 700px; }
+        th { background: #f1f5f9; color: #444; padding: 12px 8px; font-size: 13px; text-align: left; }
+        td { padding: 8px; border-bottom: 1px solid #eee; }
+        tr:last-child td { border-bottom: none; }
 
-        /* SIGNATURES */
-        .row { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 20px; }
-        .col { flex: 1; min-width: 250px; text-align: center; }
-        canvas { border: 2px dashed #bdc3c7; background: #fff; cursor: crosshair; touch-action: none; width: 100%; height: 120px; }
-        .btn-clear-sig { background: #e74c3c; color: white; border: none; padding: 5px 10px; font-size: 12px; cursor: pointer; margin-top: 5px; border-radius: 4px; }
+        /* Summary Box */
+        .summary-box { display: flex; gap: 10px; background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+        .tag { background: white; padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; border: 1px solid #ddd; color: #555; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .tag span { color: #2980b9; }
 
-        /* BUTTONS */
-        .btn-add { background: #27ae60; color: white; padding: 8px; border: none; cursor: pointer; border-radius: 4px; margin-top: 5px; }
-        .btn-save { background: #2980b9; width: 100%; padding: 15px; color: white; font-size: 18px; border: none; margin-top: 20px; cursor: pointer; border-radius: 5px; }
-        .btn-pdf { background: #e67e22; width: 100%; padding: 15px; color: white; font-size: 18px; border: none; margin-top: 10px; cursor: pointer; border-radius: 5px; }
-        .btn-download { background: #8e44ad; color: white; padding: 10px; border: none; cursor: pointer; border-radius: 4px; float: right; margin-bottom: 10px; }
+        /* Photos */
+        .photo-btn { background: #e8f5e9; color: #2e7d32; border: 1px dashed #2e7d32; padding: 10px; text-align: center; border-radius: 6px; cursor: pointer; display: block; margin-top: 5px; font-weight: bold; }
+        .photo-grid { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
+        .photo-preview { width: 80px; height: 80px; object-fit: cover; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border: 1px solid white; }
 
-        /* SEARCH BAR */
-        .search-bar { width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid #3498db; border-radius: 25px; outline: none; }
+        /* Buttons */
+        .btn-add { background: #27ae60; color: white; padding: 8px 15px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; margin-top: 10px; }
+        .btn-save { background: linear-gradient(to right, #2980b9, #2c3e50); width: 100%; padding: 15px; color: white; font-size: 16px; border: none; border-radius: 8px; margin-top: 10px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(41, 128, 185, 0.3); }
+        .btn-print { background: #e67e22; width: 100%; padding: 12px; color: white; font-size: 16px; border: none; border-radius: 8px; margin-top: 10px; cursor: pointer; font-weight: bold; }
+        
+        /* Signatures */
+        .sig-box { border: 2px dashed #ccc; border-radius: 8px; height: 100px; position: relative; background: #fff; }
+        canvas { width: 100%; height: 100%; cursor: crosshair; }
+        .clear-sig { position: absolute; top: 5px; right: 5px; background: #e74c3c; color: white; border: none; font-size: 10px; padding: 3px 8px; border-radius: 4px; cursor: pointer; }
 
+        /* Printing Hiding */
         @media print {
-            .tabs, .btn-add, .btn-save, .btn-pdf, .btn-download, #dbSection, input[type="file"], .btn-clear-sig { display: none !important; }
-            #entrySection { display: block !important; }
-            body { background: white; }
-            .container { box-shadow: none; border: none; max-width: 100%; }
-            canvas { border: 1px solid #000; }
+            .tabs, .btn-add, .btn-save, .btn-print, .photo-btn, #dbSection, .clear-sig { display: none !important; }
+            body, .container { background: white; margin: 0; padding: 0; max-width: 100%; }
+            .card { box-shadow: none; border: 1px solid #ddd; margin-bottom: 10px; page-break-inside: avoid; }
+            .header-card { background: white; color: black; border-bottom: 2px solid #000; padding: 10px; box-shadow: none; border-radius: 0; }
+            input, textarea { border: none; background: transparent; padding: 0; }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>SHREE VAIBHAV LAXMI ENTERPRISES</h1>
-    <div class="sub-header">TRACK LIST AND WORKERS RECORDS</div>
+    
+    <div class="header-card">
+        <h1>SHREE VAIBHAV LAXMI ENTERPRISES</h1>
+        <div class="sub-header">Daily Records</div>
+    </div>
 
     <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('entry')">📝 Daily Report Entry</button>
-        <button class="tab-btn" onclick="switchTab('db')">🔍 Search Old Records</button>
+        <button class="tab-btn active" onclick="switchTab('entry')">📝 Daily Entry</button>
+        <button class="tab-btn" onclick="switchTab('db')">🔍 Records</button>
     </div>
 
     <div id="entrySection" class="tab-content active">
         <form id="reportForm">
-            <div style="display:flex; gap:10px;">
-                <div style="flex:1"><label>Date:</label><input type="date" id="mainDate"></div>
-                <div style="flex:1"><label>Site:</label><input type="text" id="siteName" placeholder="Site Name"></div>
-            </div>
-
-            <div class="section-title">Labour Details</div>
-            <div class="summary-box">
-                <span>Carp: <span id="cCarp">0</span></span>
-                <span>Fit: <span id="cFit">0</span></span>
-                <span>Help: <span id="cHelp">0</span></span>
-                <span>Total: <span id="cTotal">0</span></span>
-            </div>
-
-            <div style="overflow-x:auto;">
-                <table id="labourTable">
-                    <thead>
-                        <tr>
-                            <th>Name</th><th>Type</th><th>Rate</th><th>Att</th><th>Adv</th><th>Total</th><th>X</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-            <button type="button" class="btn-add" onclick="addWorkerRow()">+ Add Worker</button>
-
-            <div class="section-title">Work & Material</div>
-            <textarea id="materialBox" rows="2" placeholder="Material In/Out..."></textarea>
-            <textarea id="workBox" rows="2" placeholder="Work Done Description..."></textarea>
             
-            <label style="margin-top:10px;"><strong>Attach Site Photos:</strong></label>
-            <input type="file" accept="image/*" multiple onchange="previewImages(this)">
-            <div class="photo-grid" id="photoContainer"></div>
-
-            <div class="section-title">Issues / Requirements</div>
-            <textarea id="issueBox" rows="2" placeholder="Urgent needs..."></textarea>
-
-            <div class="row">
-                <div class="col">
-                    <label>Supervisor Signature</label>
-                    <canvas id="sigCanvas1"></canvas>
-                    <button type="button" class="btn-clear-sig" onclick="clearCanvas('sigCanvas1')">Clear</button>
-                </div>
-                <div class="col">
-                    <label>Engineer/Client Signature</label>
-                    <canvas id="sigCanvas2"></canvas>
-                    <button type="button" class="btn-clear-sig" onclick="clearCanvas('sigCanvas2')">Clear</button>
+            <div class="card">
+                <div class="card-title">📍 Site Details</div>
+                <div style="display:flex; gap:15px;">
+                    <div style="flex:1"><label>Date</label><input type="date" id="mainDate"></div>
+                    <div style="flex:1"><label>Site Name</label><input type="text" id="siteName" placeholder="e.g. Building A"></div>
                 </div>
             </div>
 
-            <button type="button" class="btn-save" onclick="saveToDatabase()">💾 SAVE DATA (Labour Only)</button>
-            <button type="button" class="btn-pdf" onclick="window.print()">🖨️ PRINT / PDF</button>
+            <div class="card">
+                <div class="card-title">👷 Labour Muster Roll</div>
+                
+                <div class="summary-box">
+                    <div class="tag">Carp: <span id="cCarp">0</span></div>
+                    <div class="tag">Fit: <span id="cFit">0</span></div>
+                    <div class="tag">Help: <span id="cHelp">0</span></div>
+                    <div class="tag">Total: <span id="cTotal">0</span></div>
+                </div>
+
+                <div class="table-wrapper">
+                    <table id="labourTable">
+                        <thead>
+                            <tr>
+                                <th width="25%">Worker Name</th>
+                                <th width="15%">Type</th>
+                                <th width="12%">Rate</th>
+                                <th width="10%">Att.</th>
+                                <th width="15%">Adv.</th>
+                                <th width="15%">Total</th>
+                                <th width="5%"></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <button type="button" class="btn-add" onclick="addWorkerRow()">+ Add Worker</button>
+                
+                <datalist id="savedWorkersList"></datalist>
+            </div>
+
+            <div class="card card-material">
+                <div class="card-title">🧱 Material Report</div>
+                <label>Material In / Out / Stock:</label>
+                <textarea id="materialBox" rows="3" placeholder="Example: 50 Ply Sheets received (Challan 101)..."></textarea>
+            </div>
+
+            <div class="card card-work">
+                <div class="card-title">🏗️ Work Done</div>
+                <label>Description:</label>
+                <textarea id="workBox" rows="3" placeholder="Describe work progress..."></textarea>
+                
+                <label style="margin-top:15px;">Site Photos:</label>
+                <label class="photo-btn">
+                    📷 Click to Attach Photos
+                    <input type="file" accept="image/*" multiple onchange="previewImages(this)" style="display:none;">
+                </label>
+                <div class="photo-grid" id="photoContainer"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">⚠️ Issues / Requirements</div>
+                <textarea id="issueBox" rows="2" placeholder="Any problems or urgent needs..."></textarea>
+            </div>
+
+            <div class="card" style="page-break-inside: avoid;">
+                <div style="display:flex; gap:20px;">
+                    <div style="flex:1;">
+                        <label>Supervisor Sign</label>
+                        <div class="sig-box">
+                            <canvas id="sigCanvas1"></canvas>
+                            <button type="button" class="clear-sig" onclick="clearCanvas('sigCanvas1')">Clear</button>
+                        </div>
+                    </div>
+                    <div style="flex:1;">
+                        <label>Engineer/Client Sign</label>
+                        <div class="sig-box">
+                            <canvas id="sigCanvas2"></canvas>
+                            <button type="button" class="clear-sig" onclick="clearCanvas('sigCanvas2')">Clear</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" class="btn-save" onclick="saveToDatabase()">💾 SAVE DATA & REMEMBER WORKERS</button>
+            <button type="button" class="btn-print" onclick="window.print()">🖨️ SAVE PDF</button>
+
         </form>
     </div>
 
     <div id="dbSection" class="tab-content">
-        <button onclick="downloadExcel()" class="btn-download">⬇ Download Excel</button>
-        <input type="text" id="searchInput" class="search-bar" placeholder="🔍 Search by Name, Date, or Site..." onkeyup="searchDatabase()">
-        
-        <div style="overflow-x:auto;">
-            <table id="searchTable">
-                <thead>
-                    <tr style="background:#34495e; color:white;">
-                        <th>Date</th><th>Name</th><th>Type</th><th>Site</th><th>Rate</th><th>Att</th><th>Adv</th><th>Payable</th>
-                    </tr>
-                </thead>
-                <tbody id="dbBody"></tbody>
-            </table>
+        <div class="card">
+            <div class="card-title">
+                🔍 Search Old Records
+                <button onclick="downloadExcel()" style="background:#27ae60; color:white; border:none; padding:5px 10px; border-radius:4px; font-size:12px; cursor:pointer;">⬇ Excel</button>
+            </div>
+            <input type="text" id="searchInput" placeholder="Search Name, Date..." onkeyup="searchDatabase()" style="padding:12px; border:2px solid #ddd; margin-bottom:10px;">
+            <div class="table-wrapper">
+                <table id="searchTable">
+                    <thead>
+                        <tr style="background:#2c3e50; color:white;"><th>Date</th><th>Name</th><th>Type</th><th>Site</th><th>Rate</th><th>Att</th><th>Payable</th></tr>
+                    </thead>
+                    <tbody id="dbBody"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
 </div>
 
 <script>
-    // --- INITIALIZATION ---
     document.getElementById('mainDate').valueAsDate = new Date();
+    
+    // --- MEMORY SYSTEM FOR WORKERS ---
+    let masterWorkerList = {}; // Stores { "Raju": {type:"Carpenter", rate:900} }
+
+    // Load Memory on Start
     window.onload = function() {
+        const savedList = localStorage.getItem('nirmalWorkerMemory');
+        if(savedList) {
+            masterWorkerList = JSON.parse(savedList);
+            updateDataList();
+        }
         addWorkerRow();
         loadDatabase();
-        setupCanvas('sigCanvas1'); // Setup signatures
+        setupCanvas('sigCanvas1');
         setupCanvas('sigCanvas2');
     };
 
-    // --- TAB LOGIC ---
-    function switchTab(tabName) {
-        document.querySelectorAll('.tab-content').forEach(d => d.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        if(tabName === 'entry') {
-            document.getElementById('entrySection').classList.add('active');
-            document.querySelectorAll('.tab-btn')[0].classList.add('active');
-        } else {
-            document.getElementById('dbSection').classList.add('active');
-            document.querySelectorAll('.tab-btn')[1].classList.add('active');
-            loadDatabase();
+    function updateDataList() {
+        const dataList = document.getElementById('savedWorkersList');
+        dataList.innerHTML = '';
+        Object.keys(masterWorkerList).forEach(name => {
+            let option = document.createElement('option');
+            option.value = name;
+            dataList.appendChild(option);
+        });
+    }
+
+    // Auto-Fill Function
+    function checkAutoFill(input) {
+        const name = input.value.trim();
+        if(masterWorkerList[name]) {
+            const row = input.closest('tr');
+            row.querySelector('.w-type').value = masterWorkerList[name].type;
+            row.querySelector('.rate').value = masterWorkerList[name].rate;
+            calcRow(input); // Recalculate total
         }
     }
 
-    // --- WORKER & CALC LOGIC ---
+    // --- FORM LOGIC ---
     function addWorkerRow() {
         const table = document.getElementById("labourTable").getElementsByTagName('tbody')[0];
         const newRow = table.insertRow();
         newRow.innerHTML = `
-            <td><input type="text" class="w-name" placeholder="Name"></td>
-            <td><select class="w-type" onchange="updateCounts()"><option>Carpenter</option><option>Fitter</option><option>Helper</option><option>Other</option></select></td>
-            <td><input type="number" class="rate" oninput="calcRow(this)" placeholder="0"></td>
-            <td><input type="number" class="att" oninput="calcRow(this)" placeholder="1"></td>
+            <td><input type="text" class="w-name" list="savedWorkersList" oninput="checkAutoFill(this)" placeholder="Enter Name"></td>
+            <td>
+                <select class="w-type" onchange="updateCounts()">
+                    <option>Carpenter</option><option>Fitter</option><option>Helper</option><option>Other</option>
+                </select>
+            </td>
+            <td><input type="number" class="rate" oninput="calcRow(this)" placeholder="Rate"></td>
+            <td><input type="number" class="att" oninput="calcRow(this)" placeholder="1" step="0.5"></td>
             <td><input type="number" class="adv" oninput="calcRow(this)" placeholder="0"></td>
-            <td><input type="number" class="total" readonly style="background:#eee;"></td>
-            <td><button onclick="deleteRow(this)" style="color:red; background:none; border:none; font-weight:bold;">x</button></td>
+            <td><input type="number" class="total" readonly style="background:#eee; font-weight:bold; color:#2980b9;"></td>
+            <td><span onclick="this.closest('tr').remove(); updateCounts();" style="color:red; cursor:pointer; font-weight:bold;">×</span></td>
         `;
         updateCounts();
     }
+
     function calcRow(el) {
         const row = el.closest('tr');
-        row.querySelector('.total').value = ((row.querySelector('.rate').value||0) * (row.querySelector('.att').value||0)) - (row.querySelector('.adv').value||0);
+        const rate = parseFloat(row.querySelector('.rate').value) || 0;
+        const att = parseFloat(row.querySelector('.att').value) || 0;
+        const adv = parseFloat(row.querySelector('.adv').value) || 0;
+        row.querySelector('.total').value = (rate * att) - adv;
     }
-    function deleteRow(btn) { btn.closest('tr').remove(); updateCounts(); }
+
     function updateCounts() {
         let counts = {Carpenter:0, Fitter:0, Helper:0, Other:0};
         document.querySelectorAll('.w-type').forEach(s => counts[s.value]++);
@@ -193,10 +273,51 @@
         document.getElementById('cTotal').innerText = counts.Carpenter + counts.Fitter + counts.Helper + counts.Other;
     }
 
-    // --- PHOTO PREVIEW LOGIC (NEW) ---
+    // --- SAVE LOGIC (Data + Memory) ---
+    function saveToDatabase() {
+        if(!confirm("Save Data?")) return;
+        const date = document.getElementById('mainDate').value;
+        const site = document.getElementById('siteName').value || "-";
+        let newRecords = [];
+
+        // 1. Process Rows & Learn Workers
+        document.querySelectorAll('#labourTable tbody tr').forEach(row => {
+            const name = row.querySelector('.w-name').value.trim();
+            const type = row.querySelector('.w-type').value;
+            const rate = row.querySelector('.rate').value;
+            
+            if(name) {
+                // Save Record
+                newRecords.push({
+                    date: date, site: site, name: name, type: type,
+                    rate: rate, att: row.querySelector('.att').value,
+                    payable: row.querySelector('.total').value
+                });
+
+                // Learn Worker (Magic Memory)
+                masterWorkerList[name] = { type: type, rate: rate };
+            }
+        });
+
+        // 2. Save Memory
+        localStorage.setItem('nirmalWorkerMemory', JSON.stringify(masterWorkerList));
+        updateDataList(); // Update dropdown for next time
+
+        // 3. Save Records
+        let existing = JSON.parse(localStorage.getItem('nirmalData')) || [];
+        localStorage.setItem('nirmalData', JSON.stringify([...newRecords, ...existing]));
+        
+        alert("Data Saved! New workers added to memory.");
+        document.getElementById('reportForm').reset();
+        document.getElementById('photoContainer').innerHTML = "";
+        clearCanvas('sigCanvas1'); clearCanvas('sigCanvas2');
+        document.getElementById('mainDate').valueAsDate = new Date();
+        addWorkerRow();
+    }
+
+    // --- PHOTOS ---
     function previewImages(input) {
         const container = document.getElementById('photoContainer');
-        container.innerHTML = ""; // Clear old
         if (input.files) {
             Array.from(input.files).forEach(file => {
                 const reader = new FileReader();
@@ -211,72 +332,49 @@
         }
     }
 
-    // --- SIGNATURE LOGIC (NEW) ---
+    // --- DATABASE & SIGNATURES ---
     function setupCanvas(id) {
         const canvas = document.getElementById(id);
         const ctx = canvas.getContext('2d');
-        // Fix resolution
-        canvas.width = canvas.offsetWidth; 
-        canvas.height = canvas.offsetHeight;
-        
+        canvas.width = canvas.parentElement.offsetWidth; canvas.height = 100;
         let drawing = false;
-        function start(e) { drawing = true; draw(e); }
-        function end() { drawing = false; ctx.beginPath(); }
-        function draw(e) {
-            if (!drawing) return;
-            e.preventDefault();
+        function getPos(e) {
             const rect = canvas.getBoundingClientRect();
-            const x = (e.clientX || e.touches[0].clientX) - rect.left;
-            const y = (e.clientY || e.touches[0].clientY) - rect.top;
-            ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.lineTo(x, y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x, y);
+            return { x: (e.clientX || e.touches[0].clientX) - rect.left, y: (e.clientY || e.touches[0].clientY) - rect.top };
         }
+        function start(e) { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); e.preventDefault(); }
+        function draw(e) { if(!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); e.preventDefault(); }
+        function end() { drawing = false; }
+        
         canvas.addEventListener('mousedown', start); canvas.addEventListener('touchstart', start);
-        canvas.addEventListener('mouseup', end); canvas.addEventListener('touchend', end);
         canvas.addEventListener('mousemove', draw); canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('mouseup', end); canvas.addEventListener('touchend', end);
     }
-    function clearCanvas(id) {
-        const canvas = document.getElementById(id);
-        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-    }
+    function clearCanvas(id) { document.getElementById(id).getContext('2d').clearRect(0,0,1000,1000); }
 
-    // --- DATABASE & SAVE ---
-    function saveToDatabase() {
-        if(!confirm("Save labour data?")) return;
-        const date = document.getElementById('mainDate').value;
-        const site = document.getElementById('siteName').value || "Unknown";
-        let newRecords = [];
-        document.querySelectorAll('#labourTable tbody tr').forEach(row => {
-            const name = row.querySelector('.w-name').value;
-            if(name) {
-                newRecords.push({
-                    date: date, site: site, name: name,
-                    type: row.querySelector('.w-type').value,
-                    rate: row.querySelector('.rate').value,
-                    att: row.querySelector('.att').value,
-                    adv: row.querySelector('.adv').value,
-                    payable: row.querySelector('.total').value
-                });
-            }
-        });
-        let existing = JSON.parse(localStorage.getItem('nirmalData')) || [];
-        localStorage.setItem('nirmalData', JSON.stringify([...newRecords, ...existing]));
-        alert("Data Saved!");
-    }
-
-    function loadDatabase(filter = "") {
+    function loadDatabase(filter="") {
         const tbody = document.getElementById('dbBody'); tbody.innerHTML = "";
         const data = JSON.parse(localStorage.getItem('nirmalData')) || [];
-        data.filter(i => (i.name+i.date+i.site+i.type).toLowerCase().includes(filter.toLowerCase())).forEach(item => {
-            tbody.innerHTML += `<tr><td>${item.date}</td><td><strong>${item.name}</strong></td><td>${item.type}</td><td>${item.site}</td><td>${item.rate}</td><td>${item.att}</td><td>${item.adv}</td><td style="font-weight:bold">${item.payable}</td></tr>`;
+        data.filter(i => (i.name+i.date).toLowerCase().includes(filter.toLowerCase())).forEach(item => {
+            tbody.innerHTML += `<tr><td>${item.date}</td><td><b>${item.name}</b></td><td>${item.type}</td><td>${item.site}</td><td>${item.rate}</td><td>${item.att}</td><td>${item.payable}</td></tr>`;
         });
     }
     function searchDatabase() { loadDatabase(document.getElementById('searchInput').value); }
+    
     function downloadExcel() {
         const data = JSON.parse(localStorage.getItem('nirmalData')) || [];
-        if(!data.length) return alert("No data!");
-        let csv = "Date,Name,Type,Site,Rate,Att,Adv,Payable\n" + data.map(r => `${r.date},${r.name},${r.type},${r.site},${r.rate},${r.att},${r.adv},${r.payable}`).join("\n");
-        const link = document.createElement("a"); link.href = encodeURI("data:text/csv;charset=utf-8," + csv); link.download = "Nirmal_Labour_Data.csv"; link.click();
+        let csv = "Date,Name,Type,Site,Rate,Att,Payable\n" + data.map(r => `${r.date},${r.name},${r.type},${r.site},${r.rate},${r.att},${r.payable}`).join("\n");
+        const link = document.createElement("a"); link.href = encodeURI("data:text/csv;charset=utf-8," + csv); link.download = "Nirmal_Data.csv"; link.click();
+    }
+    
+    // Switch Tabs
+    function switchTab(t) {
+        document.querySelectorAll('.tab-content').forEach(d => d.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        if(t=='entry') { document.getElementById('entrySection').classList.add('active'); document.querySelectorAll('.tab-btn')[0].classList.add('active'); }
+        else { document.getElementById('dbSection').classList.add('active'); document.querySelectorAll('.tab-btn')[1].classList.add('active'); loadDatabase(); }
     }
 </script>
+
 </body>
-                </html>
+                    </html>
