@@ -1,0 +1,131 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shree Vaibhav Laxmi Enterprises – Smart Supervisor</title><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script><style>
+body{font-family:Arial;background:#f3f4f6;margin:0}
+header{background:#020617;color:#fff;padding:15px;text-align:center}
+nav{background:#1e293b;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:10px}
+nav button{background:#2563eb;color:#fff;border:none;padding:8px 12px;border-radius:6px}
+section{display:none;padding:15px}
+section.active{display:block}
+.card{background:#fff;padding:15px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.1);margin-bottom:12px}
+input,textarea,select{width:100%;padding:8px;margin-bottom:8px}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #ccc;padding:6px;text-align:center}
+footer{text-align:center;background:#020617;color:#fff;padding:10px}
+img{max-width:100%;border-radius:6px}
+</style></head>
+<body><header>
+<h2>Shree Vaibhav Laxmi Enterprises</h2>
+<p>Advanced Construction Supervisor System</p>
+</header><nav>
+<button onclick="show('login')">Login</button>
+<button onclick="show('daily')">Daily</button>
+<button onclick="show('labour')">Labour</button>
+<button onclick="show('material')">Material</button>
+<button onclick="show('history')">History</button>
+<button onclick="show('idcard')">Supervisor ID</button>
+<button onclick="show('export')">Export</button>
+</nav><!-- LOGIN --><section id="login" class="active">
+<div class="card">
+<h3>Secure Login</h3>
+<input id="pin" type="password" placeholder="Enter 4 Digit PIN">
+<button onclick="login()">Login</button>
+<p id="loginMsg"></p>
+</div>
+</section><!-- DAILY REPORT --><section id="daily">
+<div class="card">
+<h3>Daily Report</h3>
+<input id="rDate" type="date">
+<textarea id="work" placeholder="Today's Work"></textarea>
+<input type="file" accept="image/*" onchange="uploadPhoto(event)">
+<img id="sitePhoto">
+<button onclick="saveDaily()">Save Report</button>
+</div>
+</section><!-- LABOUR --><section id="labour">
+<div class="card">
+<h3>Labour Auto Calculation</h3>
+<table>
+<tr><th>Type</th><th>No</th><th>Rate</th><th>Total</th></tr>
+<tr><td>Mason</td><td><input id="mNo" oninput="calcLabour()"></td><td><input id="mRate" oninput="calcLabour()"></td><td id="mTot">0</td></tr>
+<tr><td>Helper</td><td><input id="hNo" oninput="calcLabour()"></td><td><input id="hRate" oninput="calcLabour()"></td><td id="hTot">0</td></tr>
+</table>
+<h4>Total Labour Cost ₹ <span id="labTotal">0</span></h4>
+</div>
+</section><!-- MATERIAL --><section id="material">
+<div class="card">
+<h3>Material Auto Balance</h3>
+<table>
+<tr><th>Material</th><th>Opening</th><th>Received</th><th>Used</th><th>Balance</th></tr>
+<tr>
+<td>Cement</td>
+<td><input id="cOpen" oninput="calcMat()"></td>
+<td><input id="cRec" oninput="calcMat()"></td>
+<td><input id="cUse" oninput="calcMat()"></td>
+<td id="cBal">0</td>
+</tr>
+</table>
+</div>
+</section><!-- HISTORY --><section id="history">
+<div class="card">
+<h3>Daily Report History</h3>
+<ul id="historyList"></ul>
+</div>
+</section><!-- ID CARD --><section id="idcard">
+<div class="card">
+<h3>Supervisor ID Card</h3>
+<p>Name: Supervisor</p>
+<p>Company: Shree Vaibhav Laxmi Enterprises</p>
+<div id="qrcode"></div>
+</div>
+</section><!-- EXPORT --><section id="export">
+<div class="card">
+<button onclick="pdf()">Download PDF</button>
+<button onclick="excel()">Download Excel</button>
+<button onclick="whatsapp()">Send WhatsApp</button>
+</div>
+</section><footer>© 2026 SVLE Supervisor System</footer><script>
+function show(id){document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
+
+// LOGIN
+function login(){
+ let saved=localStorage.getItem('pin')||'1234';
+ if(pin.value===saved){loginMsg.innerText='Login Success';show('daily')}else{loginMsg.innerText='Wrong PIN'}
+}
+
+// PHOTO
+function uploadPhoto(e){let r=new FileReader();r.onload=()=>sitePhoto.src=r.result;r.readAsDataURL(e.target.files[0])}
+
+// SAVE DAILY
+function saveDaily(){
+ let data=JSON.parse(localStorage.getItem('reports')||'[]');
+ data.push({date:rDate.value,work:work.value});
+ localStorage.setItem('reports',JSON.stringify(data));
+ loadHistory();alert('Saved');
+}
+
+function loadHistory(){
+ let data=JSON.parse(localStorage.getItem('reports')||'[]');
+ historyList.innerHTML=data.map(d=>`<li>${d.date} - ${d.work}</li>`).join('')
+}
+loadHistory();
+
+// LABOUR
+function calcLabour(){
+ let m=(mNo.value||0)*(mRate.value||0);let h=(hNo.value||0)*(hRate.value||0);
+ mTot.innerText=m;hTot.innerText=h;labTotal.innerText=m+h
+}
+
+// MATERIAL
+function calcMat(){cBal.innerText=(+cOpen.value||0)+(+cRec.value||0)-(+cUse.value||0)}
+
+// EXPORT
+function pdf(){const{jsPDF}=window.jspdf;let p=new jsPDF();p.text('Daily Report',10,10);p.text('Labour:'+labTotal.innerText,10,20);p.save('report.pdf')}
+function excel(){let wb=XLSX.utils.book_new();let ws=XLSX.utils.aoa_to_sheet([["Labour",labTotal.innerText]]);XLSX.utils.book_append_sheet(wb,ws,'Report');XLSX.writeFile(wb,'report.xlsx')}
+function whatsapp(){window.open(`https://wa.me/?text=Daily Report Labour ₹${labTotal.innerText}`)}
+
+// QR
+new QRCode(document.getElementById('qrcode'),{text:'Supervisor - SVLE',width:120,height:120});
+</script></body>
+  </html>
