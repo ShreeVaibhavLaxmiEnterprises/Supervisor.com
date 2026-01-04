@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nirmal Enterprise App</title>
+    <style>
+        /* --- CSS STYLES --- */
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 0;
+            padding-bottom: 70px; /* Space for bottom nav */
+        }
+
+        /* Top Header */
+        .app-header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .app-header h1 { margin: 0; font-size: 20px; }
+        .app-header p { margin: 2px 0 0; font-size: 12px; opacity: 0.8; }
+
+        /* Container */
+        .content-container {
+            padding: 15px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* --- SECTIONS (Pages) --- */
+        .page-section {
+            display: none; /* Sab chupe rahenge initially */
+            animation: fadeIn 0.3s;
+        }
+        .active-section {
+            display: block; /* Jo active hai wo dikhega */
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- DASHBOARD CARDS (Home Page) --- */
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .card h3 { margin: 0 0 5px; color: #333; }
+        .card p { margin: 0; color: #777; font-size: 14px; }
+        .stat-number { font-size: 24px; font-weight: bold; color: #27ae60; }
+
+        /* --- FORM STYLES (Hisab Page) --- */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; color: #34495e; }
+        select, input {
+            width: 100%; padding: 12px; border: 1px solid #ddd;
+            border-radius: 8px; font-size: 16px; box-sizing: border-box;
+        }
+        .btn-calc {
+            width: 100%; padding: 15px; background: #2980b9; color: white;
+            border: none; border-radius: 8px; font-size: 16px; font-weight: bold;
+            cursor: pointer;
+        }
+        
+        /* --- RESULT BOX --- */
+        #resultBox {
+            display: none;
+            background: #fff;
+            border: 2px dashed #2980b9;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 8px;
+        }
+        .result-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .final-total { border-top: 1px solid #eee; padding-top: 10px; margin-top: 10px; font-weight: bold; font-size: 18px; color: #c0392b; }
+
+        /* --- BOTTOM NAVIGATION BAR --- */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: white; border-top: 1px solid #ddd;
+            display: flex; justify-content: space-around;
+            padding: 10px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
+        .nav-item {
+            text-align: center; cursor: pointer; color: #7f8c8d;
+            flex: 1;
+        }
+        .nav-item.active { color: #2980b9; font-weight: bold; }
+        .nav-icon { font-size: 20px; display: block; margin-bottom: 2px; }
+
+        /* --- PRINT SETTINGS --- */
+        @media print {
+            .bottom-nav, .app-header, .form-input-area, .btn-calc { display: none !important; }
+            #resultBox { display: block !important; border: none; }
+            body { background: white; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-header">
+        <h1>Nirmal Enterprise</h1>
+        <p>Shuttering Contractor App</p>
+    </div>
+
+    <div class="content-container">
+
+        <div id="page-home" class="page-section active-section">
+            <h2 style="color: #444;">Dashboard</h2>
+            
+            <div class="card">
+                <div>
+                    <h3>Active Sites</h3>
+                    <p>Ghatkopar Site</p>
+                </div>
+                <div class="stat-number">03</div>
+            </div>
+
+            <div class="card">
+                <div>
+                    <h3>Total Workers</h3>
+                    <p>Registered</p>
+                </div>
+                <div class="stat-number">12</div>
+            </div>
+
+            <div class="card" onclick="switchTab('hisab')" style="cursor: pointer; border-left: 5px solid #2980b9;">
+                <div>
+                    <h3>Payment Hisab</h3>
+                    <p>Calculate karne ke liye click karein</p>
+                </div>
+                <div style="font-size: 24px;">➔</div>
+            </div>
+        </div>
+
+        <div id="page-hisab" class="page-section">
+            <h2 style="color: #444;">Worker Hisab</h2>
+            
+            <div class="form-input-area">
+                <div class="form-group">
+                    <label>Worker Select Karein:</label>
+                    <select id="workerName">
+                        <option value="0">-- Select Worker --</option>
+                        <option value="800">Raju Mistri (Rate: 800)</option>
+                        <option value="600">Shyam Helper (Rate: 600)</option>
+                        <option value="900">Sunil Carpenter (Rate: 900)</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="display: flex; gap: 10px;">
+                    <div style="flex: 1;">
+                        <label>Kab Se:</label>
+                        <input type="date" id="startDate">
+                    </div>
+                    <div style="flex: 1;">
+                        <label>Kab Tak:</label>
+                        <input type="date" id="endDate">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Kul Haziri (Days):</label>
+                    <input type="number" id="presentDays" placeholder="Example: 25">
+                </div>
+
+                <div class="form-group">
+                    <label>Advance Liya (₹):</label>
+                    <input type="number" id="advanceAmount" placeholder="0">
+                </div>
+
+                <button class="btn-calc" onclick="calculate()">HISAB CHECK KAREIN</button>
+            </div>
+
+            <div id="resultBox">
+                <div style="text-align: center; border-bottom: 1px solid #ccc; margin-bottom: 10px;">
+                    <h3>Payment Slip</h3>
+                    <p style="font-size: 12px; color: #555;">Nirmal Enterprise</p>
+                </div>
+                
+                <div class="result-row">
+                    <span>Worker Rate:</span>
+                    <span id="resRate">₹0</span>
+                </div>
+                <div class="result-row">
+                    <span>Kul Din:</span>
+                    <span id="resDays">0</span>
+                </div>
+                <div class="result-row" style="color: green;">
+                    <span>Total Kamayi:</span>
+                    <span id="resTotal">₹0</span>
+                </div>
+                <div class="result-row" style="color: red;">
+                    <span>(-) Advance:</span>
+                    <span id="resAdvance">₹0</span>
+                </div>
+                <div class="result-row final-total">
+                    <span>NET BAKI (DENA):</span>
+                    <span id="resPayable">₹0</span>
+                </div>
+
+                <button onclick="window.print()" style="margin-top: 15px; width: 100%; padding: 10px; background: #555; color: white; border: none; border-radius: 5px;">Print / Save PDF</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active" id="nav-home" onclick="switchTab('home')">
+            <span class="nav-icon">🏠</span>
+            <span>Home</span>
+        </div>
+        <div class="nav-item" id="nav-hisab" onclick="switchTab('hisab')">
+            <span class="nav-icon">🧮</span>
+            <span>Hisab</span>
+        </div>
+    </div>
+
+    <script>
+        // Tab Switching Logic
+        function switchTab(tabName) {
+            // Hide all pages
+            document.getElementById('page-home').classList.remove('active-section');
+            document.getElementById('page-hisab').classList.remove('active-section');
+            
+            // Remove active color from nav
+            document.getElementById('nav-home').classList.remove('active');
+            document.getElementById('nav-hisab').classList.remove('active');
+
+            // Show selected page
+            document.getElementById('page-' + tabName).classList.add('active-section');
+            document.getElementById('nav-' + tabName).classList.add('active');
+        }
+
+        // Calculation Logic
+        function calculate() {
+            var rate = parseInt(document.getElementById('workerName').value);
+            var days = parseInt(document.getElementById('presentDays').value);
+            var advance = document.getElementById('advanceAmount').value;
+            
+            if(rate === 0 || isNaN(days)) {
+                alert("Please Worker aur Days select karein.");
+                return;
+            }
+            if(advance === "") advance = 0;
+            else advance = parseInt(advance);
+
+            var totalEarned = rate * days;
+            var netPayable = totalEarned - advance;
+
+            // Display Values
+            document.getElementById('resRate').innerText = "₹" + rate;
+            document.getElementById('resDays').innerText = days;
+            document.getElementById('resTotal').innerText = "₹" + totalEarned;
+            document.getElementById('resAdvance').innerText = "₹" + advance;
+            document.getElementById('resPayable').innerText = "₹" + netPayable;
+
+            // Show Box
+            document.getElementById('resultBox').style.display = "block";
+        }
+    </script>
+
+</body>
+</html>
