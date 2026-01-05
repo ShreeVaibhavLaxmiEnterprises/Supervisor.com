@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shree Vaibhav Laxmi Tracker Pro</title>
+    <style>
+        :root {
+            --primary-color: #d32f2f;
+            --secondary-color: #1976d2;
+            --bg-color: #f3f4f6;
+            --text-color: #1f2937;
+            --success-color: #2e7d32;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 10px;
+            color: var(--text-color);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #ddd;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+        }
+
+        h2 { margin: 5px 0; color: var(--primary-color); text-transform: uppercase; font-size: 1.4rem; }
+        .subtitle { color: #666; font-size: 0.9rem; margin: 0; }
+
+        /* Sections */
+        .section-box {
+            border: 1px solid #e0e0e0;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            background: #fafafa;
+        }
+        
+        .section-title {
+            font-weight: bold;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Forms */
+        .form-group { margin-bottom: 12px; }
+        label { display: block; margin-bottom: 4px; font-weight: 600; font-size: 0.9rem; }
+        input, select, textarea {
+            width: 100%; padding: 10px;
+            border: 1px solid #ccc; border-radius: 4px;
+            font-size: 16px; box-sizing: border-box;
+        }
+        
+        /* Material In/Out Grid */
+        .material-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        /* Buttons */
+        button {
+            width: 100%; padding: 12px;
+            background-color: var(--primary-color);
+            color: white; border: none; border-radius: 4px;
+            font-size: 16px; cursor: pointer; margin-top: 10px;
+        }
+        button.calc-btn { background-color: var(--success-color); }
+        button.secondary-btn { background-color: #555; font-size: 0.9rem; padding: 8px; }
+        button.print-btn { background-color: var(--secondary-color); width: auto; padding: 8px 15px; }
+        button.delete-btn { background-color: #c62828; width: auto; padding: 4px 8px; font-size: 12px;}
+
+        /* Worker Hajari Styling */
+        .worker-attendance-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 5px;
+            border-bottom: 1px solid #eee;
+            background: #fff;
+        }
+        .worker-name { font-weight: bold; font-size: 0.95rem; }
+        .hajari-input {
+            width: 70px !important;
+            padding: 5px !important;
+            text-align: center;
+            border: 2px solid #90caf9;
+            font-weight: bold;
+        }
+
+        /* Calculator Styling */
+        .calc-result {
+            background: #e8f5e9;
+            border: 1px solid #a5d6a7;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+        .calc-result h3 { margin: 0; color: #2e7d32; }
+
+        /* Table */
+        .table-container { overflow-x: auto; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; vertical-align: top; }
+        th { background-color: #ffebee; color: #333; }
+
+        .work-img-preview {
+            max-width: 80px;
+            max-height: 80px;
+            border: 1px solid #ccc;
+            display: block;
+            margin-top: 5px;
+            cursor: pointer;
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; border: none; width: 100%; }
+            .section-box { border: none; padding: 0; margin: 0; }
+            table { font-size: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2>Shree Vaibhav Laxmi Enterprises</h2>
+        <p class="subtitle">Construction Daily Report & Management</p>
+    </div>
+
+    <div class="no-print">
+        <button class="secondary-btn" onclick="toggleElement('workerMgmtArea')">🛠️ Manage Workers (List)</button>
+        <div id="workerMgmtArea" style="display:none; background:#eee; padding:10px; margin-top:5px; border-radius:4px;">
+            <div style="display:flex; gap:5px;">
+                <input type="text" id="newWorkerName" placeholder="Name (Ex. Raju)">
+                <select id="newWorkerType" style="width: 100px;">
+                    <option value="Mistri">Mistri</option>
+                    <option value="Helper">Helper</option>
+                </select>
+            </div>
+            <button onclick="addWorker()" style="background:#444; margin-top:5px;">Add Worker</button>
+            <ul id="savedWorkerList" style="padding-left: 20px; margin-bottom:0;"></ul>
+        </div>
+
+        <div class="section-box" style="margin-top: 15px; border-color: var(--success-color);">
+            <div class="section-title" style="color: var(--success-color);">💰 Monthly Income Calculator</div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <select id="calcWorkerSelect" style="flex: 1;">
+                    <option value="">Select Worker...</option>
+                </select>
+                <input type="number" id="calcRate" placeholder="Daily Rate (₹)" style="flex: 1;">
+            </div>
+            <button class="calc-btn" onclick="calculateSalary()">Calculate Payment</button>
+            
+            <div id="calcResultDisplay" class="calc-result">
+                <h3>Total Payment: ₹ <span id="totalPay">0</span></h3>
+                <small>Total Hajari: <span id="totalDays">0</span> days</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-box no-print">
+        <div class="section-title">📝 Daily Entry</div>
+        
+        <div class="form-group">
+            <label>Date & Site:</label>
+            <div style="display: flex; gap: 10px;">
+                <input type="date" id="reportDate" style="flex: 1;">
+                <input type="text" id="siteName" placeholder="Site Name" style="flex: 1;">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Work Photo (Optional):</label>
+            <input type="file" id="workImageInput" accept="image/*">
+            <small style="color:#e65100;">* Photo size will be reduced automatically to save space.</small>
+        </div>
+
+        <div class="material-grid">
+            <div class="form-group">
+                <label style="color: green;">Material IN (आया):</label>
+                <textarea id="matIn" rows="2" placeholder="Ex. 50 Cement Bags"></textarea>
+            </div>
+            <div class="form-group">
+                <label style="color: red;">Material OUT (लगा/गया):</label>
+                <textarea id="matOut" rows="2" placeholder="Ex. 10 Bags Used"></textarea>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label style="background: #e3f2fd; padding: 5px; border-radius: 4px;">👷 Worker Hajari:</label>
+            <div id="attendanceList" style="border: 1px solid #ccc; padding: 5px; max-height: 300px; overflow-y: auto; background: white;">
+                <p style="text-align:center; color:#999;">Loading workers...</p>
+            </div>
+        </div>
+
+        <button onclick="processAndSaveReport()">💾 Save Daily Report</button>
+    </div>
+
+    <div class="section-box" style="background: white;">
+        <div class="section-title">
+            📋 Work History
+            <button class="print-btn no-print" onclick="window.print()">🖨️ Print PDF</button>
+        </div>
+        
+        <div class="table-container">
+            <table id="reportTable">
+                <thead>
+                    <tr>
+                        <th style="width: 12%;">Date</th>
+                        <th style="width: 15%;">Site</th>
+                        <th>Work Photo</th>
+                        <th>Material</th>
+                        <th>Hajari (Worker: Days)</th>
+                        <th class="no-print">Act</th>
+                    </tr>
+                </thead>
+                <tbody id="reportTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- INIT ---
+    document.addEventListener('DOMContentLoaded', () => {
+        loadWorkers();
+        loadReports();
+        document.getElementById('reportDate').valueAsDate = new Date();
+    });
+
+    // Helper: Toggle Visibility
+    function toggleElement(id) {
+        const el = document.getElementById(id);
+        el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // ==========================================
+    // 1. WORKER MANAGEMENT
+    // ==========================================
+    function getWorkers() { return JSON.parse(localStorage.getItem('svle_workers_v3')) || []; }
+
+    function addWorker() {
+        const name = document.getElementById('newWorkerName').value.trim();
+        const type = document.getElementById('newWorkerType').value;
+        if(!name) return alert("Enter Name!");
+        
+        const workers = getWorkers();
+        workers.push({ id: Date.now(), name, type });
+        localStorage.setItem('svle_workers_v3', JSON.stringify(workers));
+        
+        document.getElementById('newWorkerName').value = '';
+        loadWorkers();
+        alert("Worker Added!");
+    }
+
+    function removeWorker(id) {
+        if(confirm("Remove worker?")) {
+            const workers = getWorkers().filter(w => w.id !== id);
+            localStorage.setItem('svle_workers_v3', JSON.stringify(workers));
+            loadWorkers();
+        }
+    }
+
+    function loadWorkers() {
+        const workers = getWorkers();
+        // 1. Populate List in Settings
+        const list = document.getElementById('savedWorkerList');
+        list.innerHTML = '';
+        workers.forEach(w => {
+            list.innerHTML += `<li>${w.name} (${w.type}) <span onclick="removeWorker(${w.id})" style="color:red; cursor:pointer;">[x]</span></li>`;
+        });
+
+        // 2. Populate Attendance Form
+        const attContainer = document.getElementById('attendanceList');
+        if (workers.length === 0) attContainer.innerHTML = '<p style="text-align:center;">Add workers first.</p>';
+        else {
+            let html = '';
+            workers.forEach(w => {
+                html += `
+                    <div class="worker-attendance-row">
+                        <span class="worker-name">${w.name}</span>
+                        <input type="number" step="0.5" id="hajari_${w.id}" class="hajari-input" placeholder="0">
+                    </div>`;
+            });
+            attContainer.innerHTML = html;
+        }
+
+        // 3. Populate Calculator Dropdown
+        const calcSelect = document.getElementById('calcWorkerSelect');
+        calcSelect.innerHTML = '<option value="">Select Worker...</option>';
+        workers.forEach(w => {
+            calcSelect.innerHTML += `<option value="${w.name}">${w.name}</option>`;
+        });
+    }
+
+    // ==========================================
+    // 2. SAVING REPORT (With Image Compression)
+    // ==========================================
+    function processAndSaveReport() {
+        const fileInput = document.getElementById('workImageInput');
+        
+        // If image exists, compress it first, then save
+        if(fileInput.files && fileInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = function() {
+                    // Compress Logic: Max Width 300px
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const scaleFactor = 300 / img.width;
+                    canvas.width = 300;
+                    canvas.height = img.height * scaleFactor;
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    const compressedData = canvas.toDataURL('image/jpeg', 0.6); // 60% quality
+                    saveData(compressedData);
+                }
+            }
+            reader.readAsDataURL(fileInput.files[0]);
+        } else {
+            saveData(null); // No image
+        }
+    }
+
+    function saveData(imageBase64) {
+        const date = document.getElementById('reportDate').value;
+        const site = document.getElementById('siteName').value;
+        const matIn = document.getElementById('matIn').value;
+        const matOut = document.getElementById('matOut').value;
+        const workers = getWorkers();
+
+        if(!date || !site) return alert("Date and Site Name required!");
+
+        // Collect Hajari
+        let hajariData = [];
+        let totalHajari = 0;
+        workers.forEach(w => {
+            const val = document.getElementById(`hajari_${w.id}`).value;
+            if(val && parseFloat(val) > 0) {
+                hajariData.push({ name: w.name, val: val });
+                totalHajari += parseFloat(val);
+            }
+        });
+
+        const report = {
+            id: Date.now(),
+            date, site, matIn, matOut, image: imageBase64,
+            hajariList: hajariData,
+            totalHajari
+        };
+
+        const reports = JSON.parse(localStorage.getItem('svle_reports_v3')) || [];
+        reports.push(report);
+        
+        // Limit Storage: Keep only last 50 reports to prevent crash
+        if(reports.length > 50) {
+            alert("Memory full. Oldest report deleted.");
+            reports.shift(); 
+        }
+
+        localStorage.setItem('svle_reports_v3', JSON.stringify(reports));
+        
+        loadReports();
+        alert("Report Saved!");
+        
+        // Reset Inputs
+        document.getElementById('matIn').value = '';
+        document.getElementById('matOut').value = '';
+        document.getElementById('workImageInput').value = '';
+        workers.forEach(w => document.getElementById(`hajari_${w.id}`).value = '');
+    }
+
+    // ==========================================
+    // 3. LOAD REPORTS & DELETE
+    // ==========================================
+    function loadReports() {
+        const reports = JSON.parse(localStorage.getItem('svle_reports_v3')) || [];
+        const tbody = document.getElementById('reportTableBody');
+        tbody.innerHTML = '';
+        
+        // Sort Date Descending
+        reports.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        reports.forEach(r => {
+            // Material HTML
+            let matHtml = '';
+            if(r.matIn) matHtml += `<div style="color:green; font-size:0.8rem;">IN: ${r.matIn}</div>`;
+            if(r.matOut) matHtml += `<div style="color:red; font-size:0.8rem;">OUT: ${r.matOut}</div>`;
+            if(!matHtml) matHtml = '-';
+
+            // Hajari HTML
+            let hajariHtml = r.hajariList.map(h => `${h.name}: <b>${h.val}</b>`).join(', ');
+            
+            // Image HTML
+            let imgHtml = r.image ? `<img src="${r.image}" class="work-img-preview" onclick="openImage('${r.image}')">` : '<span style="color:#ccc">No Photo</span>';
+
+            const row = `
+                <tr>
+                    <td>${r.date}</td>
+                    <td><b>${r.site}</b></td>
+                    <td>${imgHtml}</td>
+                    <td>${matHtml}</td>
+                    <td>
+                        <div style="font-size:0.85rem;">${hajariHtml}</div>
+                        <div style="font-size:0.75rem; color:#666; margin-top:2px;">Total: ${r.totalHajari}</div>
+                    </td>
+                    <td class="no-print">
+                        <button class="delete-btn" onclick="deleteReport(${r.id})">X</button>
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+    }
+
+    function deleteReport(id) {
+        if(confirm("Delete record?")) {
+            let reports = JSON.parse(localStorage.getItem('svle_reports_v3')) || [];
+            reports = reports.filter(r => r.id !== id);
+            localStorage.setItem('svle_reports_v3', JSON.stringify(reports));
+            loadReports();
+        }
+    }
+
+    function openImage(src) {
+        const w = window.open("");
+        w.document.write(`<img src="${src}" style="width:100%">`);
+    }
+
+    // ==========================================
+    // 4. INCOME CALCULATOR
+    // ==========================================
+    function calculateSalary() {
+        const name = document.getElementById('calcWorkerSelect').value;
+        const rate = parseFloat(document.getElementById('calcRate').value);
+        
+        if(!name || !rate) return alert("Select a worker and enter daily rate!");
+
+        const reports = JSON.parse(localStorage.getItem('svle_reports_v3')) || [];
+        let totalDays = 0;
+
+        reports.forEach(r => {
+            const record = r.hajariList.find(h => h.name === name);
+            if(record) {
+                totalDays += parseFloat(record.val);
+            }
+        });
+
+        const totalPay = totalDays * rate;
+        
+        document.getElementById('totalDays').innerText = totalDays;
+        document.getElementById('totalPay').innerText = totalPay.toLocaleString('en-IN');
+        document.getElementById('calcResultDisplay').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
