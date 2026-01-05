@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shree Vaibhav Laxmi Enterprises - Full System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #f0f4f8; font-family: 'Segoe UI', sans-serif; }
+        .brand-blue { background-color: #0056b3; }
+        .text-brand { color: #0056b3; }
+        .hidden-section { display: none; }
+        .saving-indicator { transition: opacity 0.5s; opacity: 0; color: #16a34a; font-weight: bold; font-size: 0.9rem; }
+        .saving-indicator.show { opacity: 1; }
+        
+        /* Table Scroll for Hajari Register */
+        .table-scroll { overflow-x: auto; white-space: nowrap; }
+        
+        @media print {
+            body * { visibility: hidden; }
+            #printableArea, #printableArea * { visibility: visible; }
+            #printableArea { position: absolute; left: 0; top: 0; width: 100%; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="flex h-screen overflow-hidden">
+        <aside class="w-64 brand-blue text-white flex-shrink-0 hidden md:block">
+            <div class="p-6 text-center font-bold text-xl border-b border-blue-400">
+                <i class="fas fa-building mb-2 text-3xl"></i><br>
+                Shree Vaibhav<br>Laxmi Ent.
+            </div>
+            <nav class="mt-6">
+                <a href="#" onclick="showSection('dashboard')" class="block py-3 px-6 hover:bg-blue-700 transition"><i class="fas fa-chart-pie mr-2"></i> Dashboard</a>
+                <a href="#" onclick="showSection('dailyEntry')" class="block py-3 px-6 hover:bg-blue-700 transition"><i class="fas fa-hard-hat mr-2"></i> Labour Entry</a>
+                <a href="#" onclick="showSection('hajariRegister')" class="block py-3 px-6 hover:bg-blue-700 transition"><i class="fas fa-calendar-alt mr-2"></i> Hajari Register</a>
+                <a href="#" onclick="showSection('materialSection')" class="block py-3 px-6 hover:bg-blue-700 transition"><i class="fas fa-truck-loading mr-2"></i> Material / Samaan</a>
+                <a href="#" onclick="showSection('workerMaster')" class="block py-3 px-6 hover:bg-blue-700 transition"><i class="fas fa-users-cog mr-2"></i> Worker Setup</a>
+                <a href="#" onclick="showSection('reports')" class="block py-3 px-6 hover:bg-blue-700 transition"><i class="fas fa-file-invoice mr-2"></i> Salary Slip</a>
+            </nav>
+        </aside>
+
+        <main class="flex-1 overflow-y-auto">
+            <div class="md:hidden brand-blue text-white p-4 flex justify-between items-center sticky top-0 z-50">
+                <span class="font-bold">Shree Vaibhav Laxmi Ent.</span>
+                <button onclick="alert('Use Laptop/PC for best view')" class="text-white"><i class="fas fa-bars"></i></button>
+            </div>
+
+            <div class="p-8">
+
+                <div id="dashboard" class="section-content">
+                    <h2 class="text-2xl font-bold text-gray-700 mb-6 border-l-4 border-blue-600 pl-3">Project Dashboard</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-green-500">
+                            <div class="text-gray-500 text-sm">Labour Cost (Month)</div>
+                            <div class="text-2xl font-bold text-gray-800">₹ <span id="dashLabourCost">0</span></div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-yellow-500">
+                            <div class="text-gray-500 text-sm">Material Cost (Month)</div>
+                            <div class="text-2xl font-bold text-gray-800">₹ <span id="dashMaterialCost">0</span></div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-red-500">
+                            <div class="text-gray-500 text-sm">Total Expense</div>
+                            <div class="text-2xl font-bold text-red-600">₹ <span id="dashTotal">0</span></div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-blue-500">
+                            <div class="text-gray-500 text-sm">Active Workers</div>
+                            <div class="text-2xl font-bold text-gray-800" id="dashWorkers">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="dailyEntry" class="section-content hidden-section">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-700 border-l-4 border-blue-600 pl-3">Daily Labour Entry</h2>
+                        <span id="autoSaveMsg" class="saving-indicator"><i class="fas fa-check-circle"></i> Auto-saved</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-blue-600">
+                        <form id="dailyReportForm" onsubmit="saveDailyReport(event)">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 bg-blue-50 p-4 rounded-lg" onchange="triggerAutoSave()">
+                                <div><label class="block text-sm font-bold">Date</label><input type="date" id="reportDate" class="w-full p-2 border rounded bg-white" required></div>
+                                <div><label class="block text-sm font-bold">Site Name</label><input type="text" id="siteName" class="w-full p-2 border rounded bg-white" required></div>
+                                <div><label class="block text-sm font-bold">Supervisor</label><input type="text" id="supervisor" class="w-full p-2 border rounded bg-white" value="Sidhu Ji"></div>
+                            </div>
+                            <div class="overflow-x-auto mb-4">
+                                <table class="w-full border" id="entryTable">
+                                    <thead class="bg-gray-200">
+                                        <tr><th class="p-2 w-1/3">Worker Name</th><th class="p-2">Att.</th><th class="p-2">Rate</th><th class="p-2">OT</th><th class="p-2">Adv</th><th class="p-2">Del</th></tr>
+                                    </thead>
+                                    <tbody id="entryRows" oninput="triggerAutoSave()" onchange="triggerAutoSave()"></tbody>
+                                </table>
+                            </div>
+                            <div class="flex justify-between mt-4">
+                                <button type="button" onclick="addEntryRow()" class="bg-green-600 text-white px-4 py-2 rounded"><i class="fas fa-plus"></i> Add</button>
+                                <button type="submit" class="bg-blue-600 text-white px-8 py-2 rounded font-bold shadow-lg">Final Save</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="hajariRegister" class="section-content hidden-section">
+                    <h2 class="text-2xl font-bold text-gray-700 mb-6 border-l-4 border-indigo-600 pl-3">Hajari Register (Daily Track)</h2>
+                    
+                    <div class="bg-white p-4 rounded-xl shadow-md mb-6 flex gap-4">
+                        <div class="flex-1">
+                            <label class="block text-sm font-bold text-gray-600">Select Month</label>
+                            <input type="month" id="hajariMonthInput" class="w-full p-2 border rounded" onchange="generateHajariRegister()">
+                        </div>
+                        <div class="flex-none self-end">
+                            <button onclick="window.print()" class="bg-gray-800 text-white px-6 py-2 rounded no-print">Print Register</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-lg table-scroll">
+                        <table class="w-full text-center border-collapse text-sm border">
+                            <thead class="bg-blue-100 text-blue-900" id="hajariHead">
+                                </thead>
+                            <tbody id="hajariBody">
+                                </tbody>
+                        </table>
+                        <div class="mt-4 flex gap-4 text-sm font-bold">
+                            <span class="text-green-600">P = Full Day (1)</span>
+                            <span class="text-yellow-600">H = Half Day (0.5)</span>
+                            <span class="text-red-500">A = Absent</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="materialSection" class="section-content hidden-section">
+                    <h2 class="text-2xl font-bold text-gray-700 mb-6 border-l-4 border-yellow-500 pl-3">Material Tracker</h2>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="bg-white p-6 rounded-xl shadow-lg h-fit border-t-4 border-yellow-500">
+                            <h3 class="font-bold text-lg mb-4">Add Material</h3>
+                            <form id="materialForm" onsubmit="saveMaterial(event)">
+                                <div class="mb-3"><label class="block text-sm font-bold">Date</label><input type="date" id="matDate" class="w-full p-2 border rounded" required></div>
+                                <div class="mb-3"><label class="block text-sm font-bold">Site</label><input type="text" id="matSite" class="w-full p-2 border rounded" required></div>
+                                <div class="mb-3"><label class="block text-sm font-bold">Item</label><select id="matItem" class="w-full p-2 border rounded"><option value="Cement">Cement</option><option value="Saria">Saria</option><option value="Balu">Balu</option><option value="Gitti">Gitti</option><option value="Diesel">Diesel</option><option value="Other">Other</option></select></div>
+                                <div class="grid grid-cols-2 gap-2 mb-3">
+                                    <div><label class="block text-sm font-bold">Qty</label><input type="number" id="matQty" class="w-full p-2 border rounded" required oninput="calcMatTotal()"></div>
+                                    <div><label class="block text-sm font-bold">Rate</label><input type="number" id="matRate" class="w-full p-2 border rounded" required oninput="calcMatTotal()"></div>
+                                </div>
+                                <div class="mb-3"><label class="block text-sm font-bold">Total</label><input type="number" id="matTotal" class="w-full p-2 border rounded bg-gray-100 font-bold" readonly></div>
+                                <div class="mb-4"><label class="block text-sm font-bold">Supplier</label><input type="text" id="matSupplier" class="w-full p-2 border rounded"></div>
+                                <button type="submit" class="w-full bg-yellow-600 text-white py-2 rounded font-bold">Save Material</button>
+                            </form>
+                        </div>
+                        <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg">
+                            <table class="w-full text-left border-collapse"><thead class="bg-gray-100"><tr><th class="p-3">Date</th><th class="p-3">Item</th><th class="p-3">Qty/Rate</th><th class="p-3">Total</th><th class="p-3">Action</th></tr></thead><tbody id="materialListBody"></tbody></table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="workerMaster" class="section-content hidden-section">
+                    <h2 class="text-2xl font-bold text-gray-700 mb-6 border-l-4 border-blue-600 pl-3">Worker Setup</h2>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="bg-white p-6 rounded-xl shadow-lg h-fit">
+                            <form id="workerForm" onsubmit="saveWorker(event)">
+                                <div class="mb-4"><label class="block text-sm font-medium">Name</label><input type="text" id="wName" class="w-full p-2 border rounded mt-1" required></div>
+                                <div class="mb-4"><label class="block text-sm font-medium">Type</label><select id="wType" class="w-full p-2 border rounded"><option value="Mistri">Mistri</option><option value="Labour">Labour</option></select></div>
+                                <div class="mb-4"><label class="block text-sm font-medium">Rate</label><input type="number" id="wRate" class="w-full p-2 border rounded mt-1" required></div>
+                                <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded">Save</button>
+                            </form>
+                        </div>
+                        <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg">
+                            <table class="w-full text-left border-collapse"><thead class="bg-gray-100"><tr><th class="p-3">Name</th><th class="p-3">Type</th><th class="p-3">Rate</th><th class="p-3">Action</th></tr></thead><tbody id="workerListBody"></tbody></table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="reports" class="section-content hidden-section">
+                    <h2 class="text-2xl font-bold text-gray-700 mb-6 border-l-4 border-blue-600 pl-3">Salary Slip</h2>
+                    <div class="bg-white p-4 rounded-xl shadow-md mb-6 flex gap-4 no-print">
+                        <input type="month" id="filterMonth" class="p-2 border rounded">
+                        <select id="reportWorkerSelect" class="p-2 border rounded w-64"></select>
+                        <button onclick="generateReport()" class="bg-blue-600 text-white px-4 py-2 rounded">Generate</button>
+                    </div>
+                    <div id="printableArea" class="bg-white p-8 rounded-xl shadow-lg border hidden">
+                        <div class="text-center border-b-2 border-blue-600 pb-4 mb-6">
+                            <h1 class="text-3xl font-bold text-blue-800 uppercase">Shree Vaibhav Laxmi Enterprises</h1>
+                            <p>Supervisor Construction Track Report</p>
+                        </div>
+                        <div class="flex justify-between mb-4"><p><strong>Name:</strong> <span id="slipName"></span></p><p><strong>Month:</strong> <span id="slipMonth"></span></p></div>
+                        <table class="w-full border-collapse border border-gray-300 text-sm"><thead class="bg-gray-100"><tr><th class="border p-2">Date</th><th class="border p-2">Site</th><th class="border p-2">Rate</th><th class="border p-2">Att.</th><th class="border p-2">Total</th><th class="border p-2 text-red-600">Adv</th></tr></thead><tbody id="slipBody"></tbody><tfoot class="bg-blue-50 font-bold"><tr><td colspan="4" class="text-right p-2">Net Payable:</td><td colspan="2" class="p-2 text-blue-800 text-lg" id="slipNetPayable">0</td></tr></tfoot></table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- DATA ---
+        let workers = JSON.parse(localStorage.getItem('svle_workers')) || [];
+        let reports = JSON.parse(localStorage.getItem('svle_reports')) || [];
+        let materials = JSON.parse(localStorage.getItem('svle_materials')) || [];
+
+        function showSection(id) {
+            document.querySelectorAll('.section-content').forEach(d => d.classList.add('hidden-section'));
+            document.getElementById(id).classList.remove('hidden-section');
+            if(id === 'dailyEntry') checkDraft();
+            if(id === 'reports') populateWorkerDropdown('reportWorkerSelect');
+            if(id === 'materialSection') renderMaterialList();
+            if(id === 'dashboard') updateDashboard();
+            if(id === 'hajariRegister') {
+                document.getElementById('hajariMonthInput').value = new Date().toISOString().slice(0, 7);
+                generateHajariRegister();
+            }
+        }
+
+        // --- HAJARI REGISTER LOGIC (NEW) ---
+        function generateHajariRegister() {
+            const monthStr = document.getElementById('hajariMonthInput').value; // YYYY-MM
+            if(!monthStr) return;
+
+            const [year, month] = monthStr.split('-');
+            const daysInMonth = new Date(year, month, 0).getDate();
+            const headRow = document.getElementById('hajariHead');
+            const body = document.getElementById('hajariBody');
+
+            // 1. Build Header (Name + 1 to 31)
+            let headHtml = '<tr class="border"><th class="p-2 border sticky left-0 bg-blue-100 min-w-[150px]">Worker Name</th>';
+            for(let i=1; i<=daysInMonth; i++) {
+                headHtml += `<th class="p-2 border w-10">${i}</th>`;
+            }
+            headHtml += '</tr>';
+            headRow.innerHTML = headHtml;
+
+            // 2. Build Body
+            let bodyHtml = '';
+            workers.forEach(w => {
+                let rowHtml = `<tr class="border hover:bg-gray-50"><td class="p-2 border font-bold text-left sticky left-0 bg-white shadow-sm">${w.name}</td>`;
+                
+                for(let i=1; i<=daysInMonth; i++) {
+                    // Format date to match saved reports (YYYY-MM-DD)
+                    const dayStr = i.toString().padStart(2, '0');
+                    const dateKey = `${monthStr}-${dayStr}`;
+                    
+                    // Find if any report exists for this date AND this worker was present
+                    let status = '-';
+                    let colorClass = 'text-gray-300';
+                    
+                    const report = reports.find(r => r.date === dateKey);
+                    if(report) {
+                        const entry = report.entries.find(e => e.workerId == w.id);
+                        if(entry) {
+                            if(entry.attendance == 1) { status = 'P'; colorClass = 'text-green-700 font-bold bg-green-100'; }
+                            else if(entry.attendance == 0.5) { status = 'H'; colorClass = 'text-yellow-700 font-bold bg-yellow-100'; }
+                            else { status = 'A'; colorClass = 'text-red-500 bg-red-50'; }
+                        } else {
+                            status = 'A'; // Report exists but worker not in it
+                             colorClass = 'text-red-500 bg-red-50';
+                        }
+                    }
+
+                    rowHtml += `<td class="p-1 border text-xs ${colorClass}">${status}</td>`;
+                }
+                rowHtml += '</tr>';
+                bodyHtml += rowHtml;
+            });
+            body.innerHTML = bodyHtml;
+        }
+
+        // --- DASHBOARD ---
+        function updateDashboard() {
+            const m = new Date().toISOString().slice(0, 7);
+            let lc=0, mc=0;
+            reports.filter(r => r.date.startsWith(m)).forEach(r => r.entries.forEach(e => lc += (e.rate * e.attendance) + e.ot));
+            materials.filter(mEntry => mEntry.date.startsWith(m)).forEach(mEntry => mc += parseFloat(mEntry.total));
+            document.getElementById('dashLabourCost').innerText = lc; document.getElementById('dashMaterialCost').innerText = mc;
+            document.getElementById('dashTotal').innerText = lc + mc; document.getElementById('dashWorkers').innerText = workers.length;
+        }
+
+        // --- WORKER ---
+        function saveWorker(e) { e.preventDefault(); workers.push({id:Date.now(), name:document.getElementById('wName').value, type:document.getElementById('wType').value, rate:document.getElementById('wRate').value}); localStorage.setItem('svle_workers', JSON.stringify(workers)
