@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shree Vaibhav Laxmi Enterprises Tracker</title>
+    <style>
+        :root {
+            --primary-color: #d32f2f;
+            --bg-color: #f3f4f6;
+            --text-color: #1f2937;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 10px;
+            color: var(--text-color);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #ddd;
+            margin-bottom: 20px;
+        }
+
+        h2 { margin: 10px 0 5px 0; color: var(--primary-color); text-transform: uppercase; font-size: 1.3rem; }
+        p.subtitle { margin: 0 0 15px 0; color: #666; font-size: 0.9rem; }
+
+        .section-title {
+            background: #eee;
+            padding: 8px;
+            font-weight: bold;
+            border-radius: 4px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-group { margin-bottom: 12px; }
+        label { display: block; margin-bottom: 4px; font-weight: 600; font-size: 0.9rem; }
+        input, select, textarea {
+            width: 100%; padding: 10px;
+            border: 1px solid #ccc; border-radius: 4px;
+            font-size: 16px; box-sizing: border-box;
+        }
+
+        button {
+            width: 100%; padding: 12px;
+            background-color: var(--primary-color);
+            color: white; border: none; border-radius: 4px;
+            font-size: 16px; cursor: pointer; margin-top: 10px;
+        }
+        button.secondary-btn { background-color: #555; margin-top: 5px; }
+        button.print-btn { background-color: #0288d1; margin-bottom: 15px; }
+        button.delete-btn { background-color: #c62828; width: auto; padding: 5px 10px; font-size: 12px;}
+
+        /* Worker List Styling */
+        .worker-attendance-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 5px;
+            border-bottom: 1px solid #eee;
+            background: #fff;
+        }
+        .worker-name { font-weight: bold; font-size: 0.95rem; }
+        
+        /* Hajari Input Box */
+        .hajari-input {
+            width: 80px !important; /* Small width for number */
+            padding: 5px !important;
+            text-align: center;
+            border: 2px solid #90caf9;
+            font-weight: bold;
+        }
+
+        /* Table */
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; vertical-align: top; }
+        th { background-color: #ffebee; }
+
+        /* Report Details Styling */
+        .report-worker-item {
+            display: inline-block;
+            background: #e3f2fd;
+            padding: 2px 6px;
+            margin: 2px;
+            border-radius: 4px;
+            border: 1px solid #bbdefb;
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; border: none; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2>Shree Vaibhav Laxmi Enterprises</h2>
+        <p class="subtitle">Daily Hajari & Progress Report</p>
+    </div>
+
+    <div class="no-print">
+        <button class="secondary-btn" onclick="toggleWorkerForm()">+ Worker List Manage Karein</button>
+        
+        <div id="workerMgmtArea" style="display:none; background:#f9f9f9; padding:10px; margin-top:10px; border:1px dashed #ccc;">
+            <h4>Add New Worker</h4>
+            <div style="display:flex; gap:5px;">
+                <input type="text" id="newWorkerName" placeholder="Name (Ex. Raju)">
+                <select id="newWorkerType" style="width: 120px;">
+                    <option value="Mistri">Mistri</option>
+                    <option value="Helper">Helper</option>
+                </select>
+            </div>
+            <button onclick="addWorker()" style="background:#2e7d32;">Save Worker</button>
+            <ul id="savedWorkerList" style="padding-left: 20px; font-size:0.9rem;"></ul>
+        </div>
+    </div>
+
+    <div class="no-print">
+        <div class="section-title">Daily Entry</div>
+        
+        <div class="form-group">
+            <label>Date (तारीख):</label>
+            <input type="date" id="reportDate">
+        </div>
+
+        <div class="form-group">
+            <label>Site Name (साइट):</label>
+            <input type="text" id="siteName" placeholder="Site Ka Naam">
+        </div>
+
+        <div class="form-group">
+            <label style="background: #e3f2fd; padding: 5px;">Worker Hajari (हाजिरी भरें):</label>
+            <div id="attendanceList" style="border: 1px solid #ccc; padding: 5px; max-height: 400px; overflow-y: auto;">
+                <p style="color:red; text-align:center;">Please add workers first!</p>
+            </div>
+            <small style="color:#666; display:block; margin-top:5px;">* Tip: Full Day = 1, Half Day = 0.5, Absent = Leave blank</small>
+        </div>
+
+        <div class="form-group">
+            <label>Work & Material Note:</label>
+            <textarea id="workNote" rows="2" placeholder="Kaam ki details..."></textarea>
+        </div>
+
+        <button onclick="saveDailyReport()">Save Record</button>
+        <br><br>
+    </div>
+
+    <div class="report-section">
+        <div class="section-title">
+            Hajari Register
+            <button class="print-btn no-print" onclick="window.print()" style="width: auto; margin:0; font-size:0.8rem;">Print PDF</button>
+        </div>
+        
+        <div class="table-container">
+            <table id="reportTable">
+                <thead>
+                    <tr>
+                        <th style="width: 15%;">Date</th>
+                        <th style="width: 20%;">Site</th>
+                        <th>Hajari List (Worker: Hajari)</th>
+                        <th style="width: 10%;" class="no-print">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="reportTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- SETUP ---
+    document.addEventListener('DOMContentLoaded', () => {
+        loadWorkers();
+        renderAttendanceForm();
+        loadReports();
+        document.getElementById('reportDate').valueAsDate = new Date();
+    });
+
+    function getWorkers() { return JSON.parse(localStorage.getItem('svle_workers_v2')) || []; }
+
+    // --- WORKER MANAGEMENT ---
+    function toggleWorkerForm() {
+        const div = document.getElementById('workerMgmtArea');
+        div.style.display = div.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function addWorker() {
+        const name = document.getElementById('newWorkerName').value.trim();
+        const type = document.getElementById('newWorkerType').value;
+        if(!name) return alert("Worker name is required");
+        
+        const workers = getWorkers();
+        workers.push({ id: Date.now(), name, type });
+        localStorage.setItem('svle_workers_v2', JSON.stringify(workers));
+        
+        document.getElementById('newWorkerName').value = '';
+        loadWorkers();
+        renderAttendanceForm();
+        alert("Worker Added!");
+    }
+
+    function removeWorker(id) {
+        if(confirm("Remove this worker?")) {
+            const workers = getWorkers().filter(w => w.id !== id);
+            localStorage.setItem('svle_workers_v2', JSON.stringify(workers));
+            loadWorkers();
+            renderAttendanceForm();
+        }
+    }
+
+    function loadWorkers() {
+        const list = document.getElementById('savedWorkerList');
+        const workers = getWorkers();
+        list.innerHTML = '';
+        workers.forEach(w => {
+            list.innerHTML += `<li>${w.name} (${w.type}) <span onclick="removeWorker(${w.id})" style="color:red; cursor:pointer; margin-left:10px;">[X]</span></li>`;
+        });
+    }
+
+    // --- RENDER INPUT BOXES ---
+    function renderAttendanceForm() {
+        const container = document.getElementById('attendanceList');
+        const workers = getWorkers();
+
+        if (workers.length === 0) {
+            container.innerHTML = '<p style="text-align:center; color:#666;">No workers found. Add workers first.</p>';
+            return;
+        }
+
+        let html = '';
+        workers.forEach(w => {
+            // Using type="number" step="0.5" for easy mobile entry
+            html += `
+                <div class="worker-attendance-row">
+                    <span class="worker-name">${w.name} <small>(${w.type})</small></span>
+                    <input type="number" step="0.5" id="hajari_${w.id}" class="hajari-input" placeholder="0">
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    }
+
+    // --- SAVE REPORT ---
+    function saveDailyReport() {
+        const date = document.getElementById('reportDate').value;
+        const site = document.getElementById('siteName').value;
+        const note = document.getElementById('workNote').value;
+        const workers = getWorkers();
+
+        if(!date || !site) return alert("Date and Site Name are required!");
+
+        let hajariData = [];
+        let totalHajari = 0;
+
+        workers.forEach(w => {
+            const val = document.getElementById(`hajari_${w.id}`).value;
+            // Only save if value is entered and greater than 0
+            if(val && parseFloat(val) > 0) {
+                hajariData.push({ name: w.name, type: w.type, val: val });
+                totalHajari += parseFloat(val);
+            }
+        });
+
+        if(hajariData.length === 0) {
+            if(!confirm("No hajari entered for any worker. Save anyway?")) return;
+        }
+
+        const report = {
+            id: Date.now(),
+            date,
+            site,
+            note,
+            hajariList: hajariData,
+            totalHajari
+        };
+
+        const reports = JSON.parse(localStorage.getItem('svle_reports_v2')) || [];
+        reports.push(report);
+        localStorage.setItem('svle_reports_v2', JSON.stringify(reports));
+
+        loadReports();
+        alert("Report Saved!");
+        
+        // Clear Inputs
+        workers.forEach(w => {
+            document.getElementById(`hajari_${w.id}`).value = '';
+        });
+    }
+
+    // --- LOAD REPORTS ---
+    function loadReports() {
+        const reports = JSON.parse(localStorage.getItem('svle_reports_v2')) || [];
+        const tbody = document.getElementById('reportTableBody');
+        tbody.innerHTML = '';
+
+        reports.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        reports.forEach(r => {
+            let workerHtml = '';
+            r.hajariList.forEach(item => {
+                workerHtml += `<span class="report-worker-item"><b>${item.name}:</b> ${item.val}</span> `;
+            });
+
+            if(r.hajariList.length === 0) workerHtml = '<span style="color:red">No Workers</span>';
+
+            const row = `
+                <tr>
+                    <td>${r.date}</td>
+                    <td>
+                        <b>${r.site}</b><br>
+                        <small style="color:#666">${r.note || ''}</small>
+                    </td>
+                    <td>
+                        <div>${workerHtml}</div>
+                        <div style="margin-top:5px; font-weight:bold; color:var(--primary-color);">Total Hajari: ${r.totalHajari}</div>
+                    </td>
+                    <td class="no-print">
+                        <button class="delete-btn" onclick="deleteReport(${r.id})">X</button>
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+    }
+
+    function deleteReport(id) {
+        if(confirm("Delete this record?")) {
+            let reports = JSON.parse(localStorage.getItem('svle_reports_v2')) || [];
+            reports = reports.filter(r => r.id !== id);
+            localStorage.setItem('svle_reports_v2', JSON.stringify(reports));
+            loadReports();
+        }
+    }
+</script>
+
+</body>
+  </html>
