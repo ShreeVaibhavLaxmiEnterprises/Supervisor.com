@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shree Vaibhav Laxmi Enterprises</title>
+
+<style>
+body{font-family:Segoe UI;background:#f4f7f6;margin:0;padding:10px}
+.container{max-width:950px;margin:auto;background:#fff;padding:20px;border-radius:8px}
+header{text-align:center;border-bottom:2px solid #ccc;padding-bottom:10px}
+h1{margin:5px 0;color:#d32f2f}
+.logo{max-height:80px}
+button{padding:8px 12px;border:none;border-radius:5px;cursor:pointer;margin-top:5px}
+.blue{background:#1976d2;color:#fff}
+.green{background:#2e7d32;color:#fff}
+.purple{background:#7b1fa2;color:#fff}
+.red{background:#c62828;color:#fff;font-size:12px}
+input,select,textarea{width:100%;padding:7px;margin-top:5px;border:1px solid #ccc;border-radius:4px}
+.section{border:1px solid #eee;padding:15px;margin-top:15px;border-radius:8px}
+.title{font-weight:bold;background:#eee;padding:5px;border-left:5px solid #1976d2}
+.att{display:flex;justify-content:space-between;border-bottom:1px solid #eee;padding:5px 0}
+table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
+th,td{border:1px solid #ccc;padding:6px;vertical-align:top}
+th{background:#f0f0f0}
+img{max-width:180px;margin-top:5px;border:1px solid #ccc}
+
+@media print{
+.no-print,button,input,select,textarea{display:none!important}
+.container{box-shadow:none}
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<header>
+<img id="logoPreview" class="logo"><br>
+<h1>Shree Vaibhav Laxmi Enterprises</h1>
+<b>Supervisor : Siddharth Yadav</b>
+</header>
+
+<!-- LOGO -->
+<div class="section no-print">
+<div class="title">Company Logo</div>
+<input type="file" id="logoInput">
+</div>
+
+<!-- WORKER -->
+<div class="section no-print">
+<div class="title">Add Worker</div>
+<input id="wName" placeholder="Worker Name">
+<input id="wRate" type="number" placeholder="Daily Rate">
+<button class="green" onclick="addWorker()">Save Worker</button>
+<div id="workerList"></div>
+</div>
+
+<!-- DAILY ENTRY -->
+<div class="section no-print">
+<div class="title">Daily Entry</div>
+<input type="date" id="date">
+<input id="site" placeholder="Site Name">
+<div id="attendance"></div>
+<textarea id="desc" placeholder="Work Description"></textarea>
+<input type="file" id="photo">
+<button class="green" onclick="saveRecord()">Save Record</button>
+</div>
+
+<!-- HISAB -->
+<div class="section no-print">
+<div class="title">Hisab Kitab</div>
+<select id="hisabWorker"></select>
+<button class="purple" onclick="calculate()">Check</button>
+<div id="hisabResult" style="display:none">
+<p><b>Bill No:</b> <span id="billNo"></span></p>
+<p>Total Hajari: <b id="hH"></b></p>
+<p>Total Days: <b id="hD"></b></p>
+<p>Total Payment: <b id="hP"></b></p>
+<button class="blue" onclick="window.print()">Print Bill</button>
+<button class="green" onclick="shareWhatsApp()">WhatsApp Share</button>
+</div>
+</div>
+
+<!-- MONTHLY PDF -->
+<div class="section no-print">
+<div class="title">Monthly PDF</div>
+<input type="month" id="month">
+<button class="blue" onclick="printMonth()">Print Monthly PDF</button>
+</div>
+
+<!-- RECORDS -->
+<div class="section">
+<div class="title">Saved Records</div>
+<table>
+<thead>
+<tr>
+<th>Bill</th>
+<th>Date / Site</th>
+<th>Work & Image</th>
+<th>Payment</th>
+<th class="no-print">Del</th>
+</tr>
+</thead>
+<tbody id="records"></tbody>
+</table>
+</div>
+
+</div>
+
+<script>
+date.valueAsDate=new Date();
+
+/* LOGO */
+logoInput.onchange=()=>{
+let r=new FileReader();
+r.onload=()=>{logoPreview.src=r.result;localStorage.logo=r.result}
+r.readAsDataURL(logoInput.files[0]);
+}
+if(localStorage.logo)logoPreview.src=localStorage.logo;
+
+/* WORKERS */
+function getWorkers(){return JSON.parse(localStorage.workers||"[]")}
+function addWorker(){
+let w={id:Date.now(),name:wName.value,rate:+wRate.value};
+let ws=getWorkers();ws.push(w);
+localStorage.workers=JSON.stringify(ws);
+wName.value="";wRate.value="";
+loadWorkers();
+}
+function loadWorkers(){
+attendance.innerHTML="";workerList.innerHTML="";hisabWorker.innerHTML="<option>Select</option>";
+getWorkers().forEach(w=>{
+attendance.innerHTML+=`<div class="att">${w.name} ₹${w.rate}<input id="att_${w.id}" type="number" step="0.5"></div>`;
+workerList.innerHTML+=`${w.name} ₹${w.rate}<br>`;
+hisabWorker.innerHTML+=`<option>${w.name}</option>`;
+});
+}
+loadWorkers();
+
+/* SAVE RECORD */
+function saveRecord(){
+let f=photo.files[0];
+if(f){
+let r=new FileReader();
+r.onload=()=>finalSave(r.result);
+r.readAsDataURL(f);
+}else finalSave("");
+}
+function finalSave(img){
+let ws=getWorkers(),att=[],total=0;
+ws.forEach(w=>{
+let v=+document.getElementById("att_"+w.id).value||0;
+if(v>0){let p=v*w.rate;att.push({name:w.name,h:v,p});total+=p;}
+});
+let bill=+(localStorage.bill||0)+1;localStorage.bill=bill;
+let rec={id:Date.now(),bill:"SVLE-"+bill,date:date.value,site:site.value,desc:desc.value,photo:img,att,total};
+let rs=JSON.parse(localStorage.records||"[]");rs.push(rec);
+localStorage.records=JSON.stringify(rs);
+loadRecords();
+}
+function loadRecords(){
+let rs=JSON.parse(localStorage.records||"[]");
+records.innerHTML="";
+rs.forEach(r=>{
+records.innerHTML+=`
+<tr>
+<td>${r.bill}</td>
+<td>${r.date}<br>${r.site}</td>
+<td>${r.desc}<br>${r.photo?`<img src="${r.photo}">`:""}</td>
+<td>${r.att.map(a=>`${a.name} ${a.h} ₹${a.p}`).join("<br>")}<hr><b>₹${r.total}</b></td>
+<td class="no-print"><button class="red" onclick="del(${r.id})">X</button></td>
+</tr>`;
+});
+}
+loadRecords();
+function del(id){
+let rs=JSON.parse(localStorage.records);localStorage.records=JSON.stringify(rs.filter(r=>r.id!==id));loadRecords();
+}
+
+/* HISAB */
+function calculate(){
+let n=hisabWorker.value,rs=JSON.parse(localStorage.records||"[]");
+let h=0,p=0,d=0,bn="";
+rs.forEach(r=>r.att.forEach(a=>{if(a.name==n){h+=a.h;p+=a.p;d++;bn=r.bill}}));
+billNo.innerText=bn;
+hH.innerText=h;hD.innerText=d;hP.innerText="₹"+p;
+hisabResult.style.display="block";
+}
+
+/* WHATSAPP */
+function shareWhatsApp(){
+let msg=`Bill ${billNo.innerText}\nTotal Days: ${hD.innerText}\nPayment: ${hP.innerText}`;
+window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
+}
+
+/* MONTHLY */
+function printMonth(){
+let m=month.value;
+if(!m)return alert("Month select karein");
+document.body.querySelectorAll("tr").forEach(tr=>{
+if(!tr.innerText.includes(m))tr.style.display="none";
+});
+window.print();
+location.reload();
+}
+</script>
+</body>
+</html>
