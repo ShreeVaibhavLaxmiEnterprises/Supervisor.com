@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shree Vaibhav Laxmi Enterprises</title>
+
+<style>
+:root{
+--primary:#d32f2f;
+--secondary:#1976d2;
+--bg:#f4f7f6;
+--text:#333;
+}
+body{
+font-family:Segoe UI,Arial;
+background:var(--bg);
+margin:0;padding:10px;color:var(--text);
+}
+.container{
+max-width:820px;margin:auto;background:#fff;
+padding:20px;border-radius:8px;
+box-shadow:0 2px 10px rgba(0,0,0,.1)
+}
+header{text-align:center;border-bottom:2px solid #eee;padding-bottom:10px}
+h1{margin:0;color:var(--primary);font-size:1.4rem}
+.sub-header{font-size:.9rem;font-weight:bold}
+
+button{
+width:100%;padding:12px;border:0;border-radius:5px;
+font-size:16px;margin-top:10px;color:#fff;cursor:pointer
+}
+.btn-blue{background:#1976d2}
+.btn-green{background:#2e7d32}
+.btn-purple{background:#7b1fa2}
+.btn-red{background:#c62828;width:auto;font-size:.8rem}
+
+.form-section{border:1px solid #eee;padding:15px;border-radius:8px;margin-top:15px}
+.section-title{
+background:#eee;padding:8px;font-weight:bold;
+border-left:5px solid var(--secondary);margin-bottom:10px
+}
+label{display:block;margin-top:8px;font-weight:500}
+input,select,textarea{
+width:100%;padding:8px;margin-top:5px;
+border:1px solid #ccc;border-radius:4px
+}
+
+.worker-row{display:flex;justify-content:space-between;padding:5px 0}
+.hajari{width:70px;text-align:center;font-weight:bold}
+
+table{width:100%;border-collapse:collapse;font-size:.85rem;margin-top:10px}
+th,td{border:1px solid #ccc;padding:6px;vertical-align:top}
+th{background:#eceff1}
+
+.work-img{width:120px;border:1px solid #aaa;margin-top:5px}
+
+.bill-box{
+border:2px solid #000;padding:15px;margin-top:10px
+}
+.bill-box h2{text-align:center;margin:0}
+.bill-line{display:flex;justify-content:space-between;margin:5px 0}
+.bill-total{font-size:1.2rem;font-weight:bold;border-top:2px dashed #000;padding-top:8px}
+
+@media print{
+.no-print{display:none!important}
+body{background:#fff}
+.container{box-shadow:none}
+.work-img{width:150px}
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<header>
+<h1>Shree Vaibhav Laxmi Enterprises</h1>
+<div class="sub-header">Supervisor : Siddharth Yadav</div>
+</header>
+
+<!-- WORKER MANAGEMENT -->
+<div class="form-section no-print">
+<div class="section-title">Worker Management</div>
+
+<input id="wName" placeholder="Worker Name">
+<select id="wType">
+<option value="Mistri">Mistri</option>
+<option value="Helper">Helper</option>
+<option value="Other">Other</option>
+</select>
+<input id="wRate" type="number" placeholder="Daily Rate ₹">
+
+<button class="btn-green" onclick="addWorker()">Add Worker</button>
+<div id="workerList"></div>
+</div>
+
+<!-- DAILY ENTRY -->
+<div class="form-section no-print">
+<div class="section-title">Daily Entry</div>
+
+<input type="date" id="entryDate">
+<input id="siteName" placeholder="Site Name">
+
+<div id="attendance"></div>
+
+<textarea id="workDesc" placeholder="Work Description"></textarea>
+
+<label>Material Aaya (IN)</label>
+<textarea id="matIn"></textarea>
+
+<label>Material Laga (OUT)</label>
+<textarea id="matOut"></textarea>
+
+<input type="file" id="sitePhoto" accept="image/*">
+
+<button class="btn-green" onclick="saveDaily()">Save Record</button>
+</div>
+
+<!-- HISAB KITAB -->
+<div class="form-section no-print">
+<div class="section-title">Hisab Kitab</div>
+
+<select id="calcWorker"></select>
+<input type="date" id="fromDate">
+<input type="date" id="toDate">
+
+<button class="btn-purple" onclick="calculate()">Generate Bill</button>
+
+<div id="hisabResult" style="display:none">
+<div class="bill-box">
+<h2>Payment Bill</h2>
+<p><b>Worker:</b> <span id="bName"></span></p>
+<p><b>Date:</b> <span id="bRange"></span></p>
+
+<div class="bill-line"><span>Total Days</span><span id="bDays"></span></div>
+<div class="bill-line"><span>Total Hajari</span><span id="bHaj"></span></div>
+<div class="bill-total">Total Amount ₹ <span id="bAmt"></span></div>
+</div>
+
+<button class="btn-blue" onclick="window.print()">Print / Save PDF</button>
+</div>
+</div>
+
+<!-- RECORDS -->
+<div class="section-title">Saved Records</div>
+<table>
+<thead>
+<tr>
+<th>Date / Site</th>
+<th>Work + Material</th>
+<th>Workers</th>
+<th class="no-print">Del</th>
+</tr>
+</thead>
+<tbody id="records"></tbody>
+</table>
+
+</div>
+
+<script>
+entryDate.valueAsDate=new Date();
+
+const GW=()=>JSON.parse(localStorage.getItem("w"))||[];
+const GR=()=>JSON.parse(localStorage.getItem("r"))||[];
+
+function addWorker(){
+if(!wName.value||!wRate.value)return alert("Fill all");
+let w=GW();
+w.push({id:Date.now(),n:wName.value,t:wType.value,r:+wRate.value});
+localStorage.setItem("w",JSON.stringify(w));
+wName.value=wRate.value="";
+loadWorkers();
+}
+
+function loadWorkers(){
+let w=GW();
+workerList.innerHTML=w.map(x=>`${x.n} (${x.t}) ₹${x.r}`).join("<br>");
+attendance.innerHTML=w.map(x=>`
+<div class="worker-row">
+${x.n} <input class="hajari" id="h_${x.id}" step="0.5" type="number">
+</div>`).join("");
+calcWorker.innerHTML="<option>Select Worker</option>"+w.map(x=>`<option>${x.n}</option>`).join("");
+}
+loadWorkers()
+
+function saveDaily(){
+if(!siteName.value)return alert("Site required");
+let w=GW(),att=[],total=0;
+w.forEach(x=>{
+let v=parseFloat(document.getElementById("h_"+x.id).value||0);
+if(v>0){att.push({n:x.n,h:v,p:v*x.r});total+=v*x.r}
+});
+
+let reader=new FileReader();
+let f=sitePhoto.files[0];
+reader.onload=()=>{
+let r=GR();
+r.push({
+id:Date.now(),
+d:entryDate.value,
+s:siteName.value,
+desc:workDesc.value,
+inm:matIn.value,
+outm:matOut.value,
+att,
+total,
+img:reader.result
+});
+localStorage.setItem("r",JSON.stringify(r));
+siteName.value=workDesc.value=matIn.value=matOut.value="";
+sitePhoto.value="";
+loadRecords();
+};
+if(f)reader.readAsDataURL(f);
+else reader.onload();
+}
+
+function loadRecords(){
+records.innerHTML=GR().reverse().map(x=>`
+<tr>
+<td>${x.d}<br>${x.s}</td>
+<td>
+<b>Work:</b> ${x.desc}<br>
+<b>IN:</b> ${x.inm}<br>
+<b>OUT:</b> ${x.outm}<br>
+${x.img?`<img class="work-img" src="${x.img}">`:""}
+</td>
+<td>
+${x.att.map(a=>`${a.n} (${a.h}) ₹${a.p}`).join("<br>")}
+<hr><b>Total ₹${x.total}</b>
+</td>
+<td class="no-print"><button class="btn-red" onclick="del(${x.id})">X</button></td>
+</tr>`).join("");
+}
+loadRecords()
+
+function del(id){
+localStorage.setItem("r",JSON.stringify(GR().filter(x=>x.id!==id)));
+loadRecords();
+}
+
+function calculate(){
+let n=calcWorker.value,f=fromDate.value,t=toDate.value;
+let h=0,p=0,d=0;
+GR().forEach(x=>{
+if(f&&x.d<f)return;
+if(t&&x.d>t)return;
+let a=x.att.find(z=>z.n===n);
+if(a){h+=a.h;p+=a.p;d++}
+});
+bName.innerText=n;
+bRange.innerText=(f||"Start")+" to "+(t||"Today");
+bDays.innerText=d;
+bHaj.innerText=h;
+bAmt.innerText=p;
+hisabResult.style.display="block";
+}
+</script>
+
+</body>
+  </html>
