@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Shree Vaibhav Laxmi Enterprises | Supervisor App</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<style>
+body{font-family:Arial;background:#f2f2f2;margin:0;padding:10px}
+.container{background:#fff;padding:15px;border-radius:8px;max-width:900px;margin:auto}
+h2,h3{text-align:center}
+input,textarea,select,button{width:100%;padding:8px;margin:5px 0}
+button{background:#2c7be5;color:white;border:none;border-radius:5px;cursor:pointer}
+button:hover{background:#1a5fd0}
+.worker-row{display:flex;gap:5px;align-items:center}
+.worker-row input{width:60px}
+.worker-row button{width:auto;background:red}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{border:1px solid #ccc;padding:6px;font-size:14px;text-align:center}
+img.preview{max-width:120px;margin-top:5px;border:1px solid #ccc}
+.small-btn{padding:5px;font-size:12px}
+</style>
+</head>
+
+<body>
+<div class="container" id="mainContent">
+
+<h2>Shree Vaibhav Laxmi Enterprises</h2>
+<h3>Supervisor: Siddharth Yadav | Tracking App</h3>
+
+<!-- WORKER ADD -->
+<h3>👷 Worker Management</h3>
+<input id="workerName" placeholder="Worker Name">
+<input id="workerRate" placeholder="Daily Rate ₹">
+<button onclick="addWorker()">+ Add Worker</button>
+
+<div id="workerList"></div>
+
+<hr>
+
+<!-- DAILY ENTRY -->
+<h3>📅 Daily Entry (रोज़ का काम)</h3>
+<input type="date" id="date">
+<input placeholder="Site Name" id="site">
+
+<h4>Worker Hajari</h4>
+<div id="attendance"></div>
+<small>* 1 = Full Day | 0.5 = Half Day</small>
+
+<textarea id="maalIn" placeholder="Maal Aaya (IN)"></textarea>
+<textarea id="maalOut" placeholder="Maal Laga (OUT)"></textarea>
+<textarea id="workDesc" placeholder="Aaj ka kaam"></textarea>
+
+<input type="file" id="imageUpload" accept="image/*" onchange="previewImage()">
+<img id="imgPreview" class="preview">
+
+<button onclick="saveDaily()">💾 Save Daily Record (Auto PDF)</button>
+
+<hr>
+
+<!-- HISAB KITAB -->
+<h3>💰 Hisab Kitab</h3>
+<select id="calcWorker"></select>
+<button onclick="calculate()">Check Hisab</button>
+<div id="calcResult"></div>
+<button onclick="hisabPDF()">Generate Hisab PDF</button>
+
+<hr>
+
+<!-- SAVED -->
+<h3>📂 Saved Records / PDF Register</h3>
+<table>
+<thead>
+<tr>
+<th>Date / Site</th>
+<th>Work & Material</th>
+<th>Payment</th>
+<th>Image</th>
+<th>Del</th>
+</tr>
+</thead>
+<tbody id="records"></tbody>
+</table>
+
+</div>
+
+<script>
+let workers=[];
+let records=[];
+
+function addWorker(){
+ let name=workerName.value;
+ let rate=workerRate.value;
+ if(!name||!rate) return alert("Fill worker details");
+ workers.push({name,rate});
+ workerName.value="";workerRate.value="";
+ renderWorkers();
+}
+
+function removeWorker(i){
+ workers.splice(i,1);
+ renderWorkers();
+}
+
+function renderWorkers(){
+ let list="",att="",sel="<option>Select Worker</option>";
+ workers.forEach((w,i)=>{
+ list+=`<div class="worker-row">${w.name} (₹${w.rate})
+ <button onclick="removeWorker(${i})">X</button></div>`;
+ att+=`<div class="worker-row">${w.name}
+ <input type="number" step="0.5" id="att${i}" value="0"></div>`;
+ sel+=`<option value="${i}">${w.name}</option>`;
+ });
+ workerList.innerHTML=list;
+ attendance.innerHTML=att;
+ calcWorker.innerHTML=sel;
+}
+
+function previewImage(){
+ let file=imageUpload.files[0];
+ if(file){
+  let r=new FileReader();
+  r.onload=e=>imgPreview.src=e.target.result;
+  r.readAsDataURL(file);
+ }
+}
+
+function saveDaily(){
+ let payments=[];
+ let total=0;
+ workers.forEach((w,i)=>{
+  let days=parseFloat(document.getElementById("att"+i).value)||0;
+  let pay=days*w.rate;
+  payments.push(`${w.name}: ₹${pay}`);
+  total+=pay;
+ });
+
+ let rec={
+ date:date.value,
+ site:site.value,
+ work:workDesc.value,
+ maal:maalIn.value+" | "+maalOut.value,
+ payment:payments.join("<br>"),
+ img:imgPreview.src
+ };
+ records.push(rec);
+ renderRecords();
+ generatePDF(); // AUTO PDF
+}
+
+function renderRecords(){
+ let rows="";
+ records.forEach((r,i)=>{
+ rows+=`<tr>
+ <td>${r.date}<br>${r.site}</td>
+ <td>${r.work}<br>${r.maal}</td>
+ <td>${r.payment}</td>
+ <td>${r.img?`<img src="${r.img}" class="preview">`:""}</td>
+ <td><button class="small-btn" onclick="records.splice(${i},1);renderRecords()">Del</button></td>
+ </tr>`;
+ });
+ records.innerHTML=rows;
+}
+
+async function generatePDF(){
+ const {jsPDF}=window.jspdf;
+ let pdf=new jsPDF();
+ let canvas=await html2canvas(document.getElementById("mainContent"));
+ let img=canvas.toDataURL("image/png");
+ pdf.addImage(img,"PNG",5,5,200,0);
+ pdf.save("Daily_Record.pdf");
+}
+
+function calculate(){
+ let i=calcWorker.value;
+ if(i==="Select Worker") return;
+ let total=0;
+ records.forEach(r=>{
+  if(r.payment.includes(workers[i].name)){
+   let m=r.payment.match(/₹(\d+)/);
+   if(m) total+=parseInt(m[1]);
+  }
+ });
+ calcResult.innerHTML=`Total Payment: ₹${total}`;
+}
+
+function hisabPDF(){
+ generatePDF();
+}
+</script>
+</body>
+</html>
