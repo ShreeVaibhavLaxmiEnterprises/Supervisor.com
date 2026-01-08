@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Shree Vaibhav Laxmi Enterprises</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body{font-family:Arial;background:#f2f2f2;margin:0;padding:10px}
+h1{text-align:center;font-size:34px;margin:5px 0}
+h2{text-align:center}
+.box{background:#fff;padding:15px;margin:10px 0;border-radius:8px}
+input,select,textarea,button{width:100%;padding:8px;margin:5px 0}
+button{background:#1e90ff;color:#fff;border:none;border-radius:5px}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{border:1px solid #ccc;padding:6px;text-align:center}
+img{max-width:80px}
+.del{background:red}
+</style>
+</head>
+
+<body>
+
+<h1>SHREE VAIBHAV LAXMI ENTERPRISES</h1>
+<p style="text-align:center"><b>Supervisor:</b> Siddharth Yadav</p>
+
+<!-- WORKER -->
+<div class="box">
+<h2>Worker Add Karein</h2>
+<input id="wname" placeholder="Worker Name">
+<select id="wtype">
+<option>Mistry</option>
+<option>Helper</option>
+<option>Other</option>
+</select>
+<input id="wrate" placeholder="Daily Rate ₹">
+<button onclick="addWorker()">Add Worker</button>
+
+<table id="workerTable">
+<tr><th>Name</th><th>Type</th><th>Rate</th><th>Del</th></tr>
+</table>
+</div>
+
+<!-- DAILY ENTRY -->
+<div class="box">
+<h2>Daily Entry</h2>
+<input type="date" id="date">
+<input id="site" placeholder="Site Name">
+<select id="workerSelect"></select>
+<select id="hajri">
+<option value="1">Full Day (1)</option>
+<option value="0.5">Half Day (0.5)</option>
+</select>
+<input id="in" placeholder="Maal Aaya (IN)">
+<input id="out" placeholder="Maal Laga (OUT)">
+<textarea id="work" placeholder="Aaj ka Kaam"></textarea>
+<input type="file" id="img">
+<button onclick="saveDaily()">Save Daily Entry</button>
+<button onclick="dailyPDF()">Daily Billing PDF</button>
+</div>
+
+<!-- RECORDS -->
+<div class="box">
+<h2>Saved Records</h2>
+<table id="recordTable">
+<tr>
+<th>Date / Site</th>
+<th>Work</th>
+<th>Payment</th>
+<th>Image</th>
+<th>Del</th>
+</tr>
+</table>
+</div>
+
+<!-- HISAB KITAB -->
+<div class="box">
+<h2>Hisab Kitab</h2>
+<select id="hisabWorker"></select>
+<input type="date" id="from">
+<input type="date" id="to">
+<button onclick="calculateHisab()">Check Hisab</button>
+<p id="hisabResult"></p>
+<button onclick="hisabPDF()">Hisab Kitab PDF</button>
+</div>
+
+<script>
+let workers=JSON.parse(localStorage.getItem("workers")||"[]");
+let records=JSON.parse(localStorage.getItem("records")||"[]");
+
+function save(){
+localStorage.setItem("workers",JSON.stringify(workers));
+localStorage.setItem("records",JSON.stringify(records));
+}
+
+function load(){
+workerTable.innerHTML="<tr><th>Name</th><th>Type</th><th>Rate</th><th>Del</th></tr>";
+workerSelect.innerHTML="";
+hisabWorker.innerHTML="";
+
+workers.forEach((w,i)=>{
+workerTable.innerHTML+=`
+<tr>
+<td>${w.name}</td><td>${w.type}</td><td>₹${w.rate}</td>
+<td><button class="del" onclick="delWorker(${i})">X</button></td>
+</tr>`;
+workerSelect.innerHTML+=`<option value="${i}">${w.name}</option>`;
+hisabWorker.innerHTML+=`<option value="${i}">${w.name}</option>`;
+});
+
+recordTable.innerHTML=`<tr>
+<th>Date / Site</th><th>Work</th><th>Payment</th><th>Image</th><th>Del</th>
+</tr>`;
+
+records.forEach((r,i)=>{
+recordTable.innerHTML+=`
+<tr>
+<td>${r.date}<br>${r.site}</td>
+<td>${r.work}<br>IN:${r.inn} OUT:${r.out}</td>
+<td>₹${r.pay}</td>
+<td>${r.img?`<img src="${r.img}">`:""}</td>
+<td><button class="del" onclick="delRec(${i})">X</button></td>
+</tr>`;
+});
+}
+
+function addWorker(){
+if(!wname.value||!wrate.value)return alert("Fill all");
+workers.push({name:wname.value,type:wtype.value,rate:+wrate.value});
+save();load();wname.value=wrate.value="";
+}
+function delWorker(i){workers.splice(i,1);save();load();}
+function delRec(i){records.splice(i,1);save();load();}
+
+function saveDaily(){
+let w=workers[workerSelect.value];
+let pay=w.rate*+hajri.value;
+let reader=new FileReader();
+reader.onload=()=>{
+records.push({
+date:date.value,site:site.value,worker:w.name,
+work:work.value,inn:in.value,out:out.value,
+pay:pay,img:reader.result
+});
+save();load();
+}
+if(img.files[0])reader.readAsDataURL(img.files[0]); else reader.onload();
+}
+
+function dailyPDF(){
+const {jsPDF}=window.jspdf;
+let pdf=new jsPDF();
+records.slice(-1).forEach(r=>{
+pdf.setFontSize(22);
+pdf.text("SHREE VAIBHAV LAXMI ENTERPRISES",105,15,null,null,"center");
+pdf.setFontSize(12);
+pdf.text(`Date: ${r.date}`,10,30);
+pdf.text(`Site: ${r.site}`,10,38);
+pdf.text(`Worker: ${r.worker}`,10,46);
+pdf.text(`Work: ${r.work}`,10,54);
+pdf.text(`Material IN: ${r.inn}`,10,62);
+pdf.text(`Material OUT: ${r.out}`,10,70);
+pdf.text(`Payment: ₹${r.pay}`,10,78);
+if(r.img)pdf.addImage(r.img,"JPEG",10,85,60,40);
+});
+pdf.save("Daily_Bill.pdf");
+}
+
+function calculateHisab(){
+let w=workers[hisabWorker.value];
+let f=new Date(from.value),t=new Date(to.value);
+let total=0,days=0;
+records.forEach(r=>{
+let d=new Date(r.date);
+if(r.worker===w.name && d>=f && d<=t){total+=r.pay;days++;}
+});
+hisabResult.innerHTML=`${w.name} | Days: ${days} | Total ₹${total}`;
+}
+
+function hisabPDF(){
+const {jsPDF}=window.jspdf;
+let pdf=new jsPDF();
+pdf.setFontSize(22);
+pdf.text("SHREE VAIBHAV LAXMI ENTERPRISES",105,15,null,null,"center");
+pdf.setFontSize(14);
+pdf.text("HISAB KITAB BILL",105,25,null,null,"center");
+pdf.setFontSize(12);
+pdf.text(hisabResult.innerText,10,40);
+pdf.save("Hisab_Kitab_Bill.pdf");
+}
+
+load();
+</script>
+
+</body>
+</html>
