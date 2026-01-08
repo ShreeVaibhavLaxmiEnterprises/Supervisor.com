@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Construction Work Manager</title>
+
+<style>
+body{font-family:Arial;background:#f4f6f8;margin:0;padding:10px}
+.container{max-width:1000px;margin:auto;background:#fff;padding:15px;border-radius:8px}
+header{text-align:center;border-bottom:2px solid #000;padding-bottom:10px}
+header img{max-height:70px;display:block;margin:auto}
+
+h2{background:#eee;padding:8px;border-left:5px solid #1976d2}
+
+input,select,textarea{width:100%;padding:8px;margin-top:5px}
+button{padding:8px 12px;border:0;border-radius:5px;color:#fff;cursor:pointer;margin-top:6px}
+.blue{background:#1976d2}
+.green{background:#2e7d32}
+.red{background:#c62828}
+.purple{background:#6a1b9a}
+
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{border:1px solid #ccc;padding:6px;font-size:.85rem}
+th{background:#eceff1}
+
+.work-img{width:260px;border:2px solid #000;margin-top:5px}
+
+.bill-box{border:2px solid #000;padding:15px}
+
+.no-print{display:block}
+
+@media print{
+.no-print{display:none!important}
+body{background:#fff}
+}
+
+/* PRINT MODES */
+.print-daily .bill-area,
+.print-daily .workers-section,
+.print-daily .records-section{display:none}
+
+.print-bill .daily-section,
+.print-bill .workers-section,
+.print-bill .records-section{display:none}
+
+.print-records .daily-section,
+.print-records .bill-area,
+.print-records .workers-section{display:none}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<header>
+<img id="logoImg">
+<input type="file" class="no-print" onchange="uploadLogo(this)">
+<h1>Shree Vaibhav Laxmi Enterprises</h1>
+</header>
+
+<!-- WORKER MANAGEMENT -->
+<div class="workers-section no-print">
+<h2>Worker Management</h2>
+<select id="wType">
+<option>Mistri</option>
+<option>Helper</option>
+<option>Other</option>
+</select>
+<input id="wName" placeholder="Worker Name">
+<input id="wRate" type="number" placeholder="Daily Wage">
+<button class="green" onclick="addWorker()">Add Worker</button>
+
+<table>
+<thead>
+<tr><th>Type</th><th>Name</th><th>Rate</th><th>Remove</th></tr>
+</thead>
+<tbody id="workerList"></tbody>
+</table>
+</div>
+
+<!-- DAILY ENTRY -->
+<div class="daily-section no-print">
+<h2>Daily Entry</h2>
+<input type="date" id="entryDate">
+<input id="siteName" placeholder="Site Name">
+<textarea id="workDesc" placeholder="Work Description"></textarea>
+
+<label>Material Aaya</label>
+<textarea id="matIn"></textarea>
+<label>Material Laga</label>
+<textarea id="matOut"></textarea>
+
+<input type="file" id="sitePhoto" accept="image/*">
+<button class="green" onclick="saveDaily()">Save Entry</button>
+<button class="blue" onclick="printDaily()">Daily Entry PDF</button>
+</div>
+
+<!-- BILL -->
+<div class="bill-area">
+<div class="bill-box">
+<h2 style="text-align:center">PAYMENT BILL</h2>
+<p><b>Bill No:</b> <span id="billNo"></span></p>
+<p><b>Worker:</b> <span id="bWorker"></span></p>
+<p><b>Amount:</b> ₹ <span id="bAmt"></span></p>
+</div>
+</div>
+
+<div class="no-print">
+<input id="billWorker" placeholder="Worker Name">
+<input type="number" id="billAmount" placeholder="Amount">
+<button class="purple" onclick="generateBill()">Generate Bill PDF</button>
+</div>
+
+<!-- RECORDS -->
+<div class="records-section">
+<h2 class="no-print">Saved Records</h2>
+<button class="blue no-print" onclick="printRecords()">Records PDF</button>
+
+<table>
+<thead>
+<tr><th>Date</th><th>Site</th><th>Work</th><th>Material</th></tr>
+</thead>
+<tbody id="records"></tbody>
+</table>
+</div>
+
+</div>
+
+<script>
+entryDate.valueAsDate=new Date();
+
+/* LOGO */
+function uploadLogo(i){
+let r=new FileReader();
+r.onload=()=>{localStorage.logo=r.result;logoImg.src=r.result}
+r.readAsDataURL(i.files[0]);
+}
+logoImg.src=localStorage.logo||"";
+
+/* WORKERS */
+function addWorker(){
+let w=JSON.parse(localStorage.workers||"[]");
+w.push({t:wType.value,n:wName.value,r:wRate.value});
+localStorage.workers=JSON.stringify(w);
+loadWorkers();
+}
+function removeWorker(i){
+let w=JSON.parse(localStorage.workers||"[]");
+w.splice(i,1);
+localStorage.workers=JSON.stringify(w);
+loadWorkers();
+}
+function loadWorkers(){
+let w=JSON.parse(localStorage.workers||"[]");
+workerList.innerHTML=w.map((x,i)=>`
+<tr>
+<td>${x.t}</td><td>${x.n}</td><td>${x.r}</td>
+<td><button class="red" onclick="removeWorker(${i})">X</button></td>
+</tr>`).join("");
+}
+loadWorkers();
+
+/* DAILY */
+function saveDaily(){
+let r=JSON.parse(localStorage.records||"[]");
+let img="";
+if(sitePhoto.files[0]){
+let rd=new FileReader();
+rd.onload=()=>{img=rd.result;push()}
+rd.readAsDataURL(sitePhoto.files[0]);
+}else push();
+
+function push(){
+r.push({
+d:entryDate.value,
+s:siteName.value,
+w:workDesc.value,
+m:matIn.value+" / "+matOut.value,
+img
+});
+localStorage.records=JSON.stringify(r);
+loadRecords();
+alert("Saved");
+}
+}
+
+function loadRecords(){
+let r=JSON.parse(localStorage.records||"[]");
+records.innerHTML=r.map(x=>`
+<tr>
+<td>${x.d}</td>
+<td>${x.s}</td>
+<td>${x.w}<br>${x.img?`<img class="work-img" src="${x.img}">`:""}</td>
+<td>${x.m}</td>
+</tr>`).join("");
+}
+loadRecords();
+
+/* PRINT */
+function printDaily(){
+document.body.className="print-daily";
+window.print();
+document.body.className="";
+}
+function generateBill(){
+billNo.innerText=(+localStorage.billNo||1000)+1;
+localStorage.billNo=billNo.innerText;
+bWorker.innerText=billWorker.value;
+bAmt.innerText=billAmount.value;
+document.body.className="print-bill";
+window.print();
+document.body.className="";
+}
+function printRecords(){
+document.body.className="print-records";
+window.print();
+document.body.className="";
+}
+</script>
+
+</body>
+</html>
