@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Shree Vaibhav Laxmi Tracker Pro</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f4; margin: 0; padding: 10px; color: #333; }
+        
+        /* Containers */
+        .container { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); max-width: 800px; margin: 0 auto; }
+        
+        /* Header */
+        h2 { color: #d32f2f; text-align: center; margin-top: 0; text-transform: uppercase; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+        .subtitle { text-align: center; color: #666; font-size: 0.9em; margin-top: -10px; margin-bottom: 20px; }
+
+        /* Inputs */
+        input, select, textarea { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
+        label { font-weight: bold; font-size: 0.9em; margin-bottom: 5px; display: block; }
+
+        /* Buttons */
+        button { width: 100%; padding: 12px; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; color: white; margin-top: 5px; }
+        .btn-blue { background: #1976d2; }
+        .btn-green { background: #388e3c; font-weight: bold; }
+        .btn-orange { background: #f57c00; color: black; font-weight: bold; }
+        .btn-grey { background: #555; }
+        .btn-red { background: #c62828; width: auto; padding: 5px 10px; font-size: 12px; }
+
+        /* Sections */
+        .section-box { border: 1px solid #ddd; padding: 10px; margin-bottom: 15px; background: #fafafa; border-radius: 5px; }
+        .section-title { background: #eee; padding: 8px; font-weight: bold; margin-bottom: 10px; border-left: 5px solid #1976d2; }
+
+        /* Worker List Items */
+        .worker-row { display: flex; justify-content: space-between; align-items: center; background: white; padding: 8px; border-bottom: 1px solid #eee; margin-bottom: 5px; }
+        .worker-row input { width: 80px; text-align: center; margin-bottom: 0; border: 2px solid #90caf9; }
+        
+        /* Table */
+        table { width: 100%; border-collapse: collapse; font-size: 0.85em; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 6px; text-align: left; }
+        th { background: #e3f2fd; }
+
+        /* Bill System */
+        #billSystem { display: none; background: white; padding: 20px; border: 2px solid black; }
+        .print-only { display: none; }
+
+        @media print {
+            body * { visibility: hidden; }
+            #billSystem, #billSystem * { visibility: visible; }
+            #billSystem { position: absolute; left: 0; top: 0; width: 100%; display: block !important; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="mainApp">
+    <h2>Shree Vaibhav Laxmi Enterprises</h2>
+    <p class="subtitle">Supervisor: Siddharth Yadav</p>
+
+    <div id="errorBox" style="display:none; background:#ffcdd2; color:red; padding:10px; border:1px solid red; margin-bottom:10px;"></div>
+
+    <button type="button" class="btn-grey" onclick="toggleDisplay('workerFormArea')">
+        + Worker Add / List Check Karein
+    </button>
+    
+    <div id="workerFormArea" class="section-box" style="display:none; margin-top:10px;">
+        <h4 style="margin-top:0;">Naya Worker Jodein</h4>
+        <input type="text" id="wName" placeholder="Naam (Name)">
+        <select id="wType">
+            <option value="Mistri">Mistri</option>
+            <option value="Helper">Helper</option>
+        </select>
+        <input type="number" id="wRate" placeholder="Rate (₹)">
+        <button type="button" class="btn-green" onclick="addNewWorker()">Save Worker</button>
+        
+        <hr>
+        <h4>Worker List:</h4>
+        <ul id="workerListUL" style="padding-left:20px; font-size:0.9em;"></ul>
+    </div>
+
+    <div class="section-box" style="margin-top:20px;">
+        <div class="section-title">Daily Entry (Roz ka Kaam)</div>
+        
+        <label>Date:</label>
+        <input type="date" id="entryDate">
+        
+        <label>Site Name:</label>
+        <input type="text" id="siteName" placeholder="Site ka naam...">
+
+        <label style="background:#e3f2fd; padding:5px;">Worker Hajari (Attendance):</label>
+        <div id="hajariListArea">
+            <p style="color:#666; text-align:center;">Loading Workers...</p>
+        </div>
+        <small>* 1 = Full Day, 0.5 = Half Day</small>
+
+        <label style="margin-top:10px;">Material IN (Aaya):</label>
+        <textarea id="matIn" rows="2" placeholder="Cement, Reti etc..."></textarea>
+        
+        <label>Material OUT (Laga):</label>
+        <textarea id="matOut" rows="2" placeholder="Kahan use hua..."></textarea>
+
+        <label>Work Description & Photo:</label>
+        <textarea id="workDesc" rows="2" placeholder="Aaj kya kaam hua..."></textarea>
+        <input type="file" id="photoInput" accept="image/*" onchange="handlePhoto(this)">
+        <input type="hidden" id="photoBase64">
+        <img id="photoPreview" style="max-width:100px; display:none; margin-top:5px; border:1px solid #ccc;">
+
+        <button type="button" class="btn-green" onclick="saveRecord()">SAVE RECORD</button>
+    </div>
+
+    <div class="section-box" style="border-left: 5px solid #9c27b0;">
+        <div class="section-title" style="background:none; border:none; padding:0; margin:0;">
+            Hisab Kitab (Calculator)
+        </div>
+        <div style="display:flex; gap:5px; margin-top:10px;">
+            <input type="date" id="calcFrom">
+            <input type="date" id="calcTo">
+        </div>
+        <select id="calcWorkerSelect" style="margin-top:5px;">
+            <option value="">Select Worker...</option>
+        </select>
+        <button type="button" class="btn-blue" style="background:#9c27b0;" onclick="doCalculation()">Check Hisab</button>
+
+        <div id="calcResult" style="display:none; background:#f3e5f5; padding:10px; margin-top:10px; border-radius:5px;">
+            <h3 id="resName" style="margin:0;"></h3>
+            <p id="resRange" style="font-size:0.8em; color:#666;"></p>
+            <p>Total Hajari: <b id="resHajari">0</b></p>
+            <p>Total Amount: <b id="resMoney" style="color:green; font-size:1.2em;">₹0</b></p>
+            
+            <button type="button" class="btn-orange" onclick="openBill()">Generate PDF Bill</button>
+        </div>
+    </div>
+
+    <div class="section-box">
+        <div class="section-title">Saved Records</div>
+        <div style="overflow-x:auto;">
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th>Date/Site</th>
+                        <th>Details</th>
+                        <th>Payment</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="billSystem">
+    <div style="text-align:center; border-bottom:2px solid black; padding-bottom:10px; margin-bottom:20px;">
+        <h1 style="margin:0; color:#d32f2f;">SHREE VAIBHAV LAXMI ENTERPRISES</h1>
+        <p style="margin:5px 0;">Shuttering & Construction Contractor</p>
+        <p style="margin:0; font-weight:bold;">Supervisor: Siddharth Yadav</p>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+        <div>
+            <strong>TO WORKER:</strong><br>
+            <span id="billName" style="font-size:1.2em;"></span>
+        </div>
+        <div style="text-align:right;">
+            <strong>DATE:</strong> <span id="billDate"></span><br>
+            <strong>TYPE:</strong> Payment Voucher
+        </div>
+    </div>
+
+    <table style="width:100%; border:1px solid black; border-collapse:collapse;">
+        <tr style="background:#eee;">
+            <th style="border:1px solid black; padding:10px;">Description</th>
+            <th style="border:1px solid black; padding:10px; text-align:center;">Quantity</th>
+            <th style="border:1px solid black; padding:10px; text-align:right;">Amount</th>
+        </tr>
+        <tr>
+            <td style="border:1px solid black; padding:10px;">
+                Work Duration<br>
+                <small id="billRange"></small>
+            </td>
+            <td style="border:1px solid black; padding:10px; text-align:center;">
+                <span id="billHajari"></span> Days
+            </td>
+            <td style="border:1px solid black; padding:10px; text-align:right;">
+                -
+            </td>
+        </tr>
+        <tr>
+            <td style="border:1px solid black; padding:10px; font-weight:bold;">TOTAL PAYABLE</td>
+            <td style="border:1px solid black;"></td>
+            <td style="border:1px solid black; padding:10px; text-align:right; font-weight:bold; font-size:1.2em;">
+                ₹<span id="billAmt"></span>
+            </td>
+        </tr>
+    </table>
+
+    <div style="margin-top:50px; display:flex; justify-content:space-between;">
+        <div style="text-align:center; width:40%; border-top:1px dashed black; padding-top:5px;">Worker Signature</div>
+        <div style="text-align:center; width:40%; border-top:1px dashed black; padding-top:5px;">Supervisor Signature</div>
+    </div>
+
+    <div class="no-print" style="margin-top:30px; text-align:center;">
+        <button class="btn-green" onclick="window.print()">PRINT / SAVE PDF</button>
+        <button class="btn-red" onclick="closeBill()">CLOSE</button>
+    </div>
+</div>
+
+<script>
+    // --- ERROR HANDLING SYSTEM ---
+    window.onerror = function(message, source, lineno, colno, error) {
+        var errorBox = document.getElementById('errorBox');
+        errorBox.style.display = 'block';
+        errorBox.innerHTML = "Error: " + message + "<br>Line: " + lineno;
+        return false;
+    };
+
+    // --- VARIABLES ---
+    let workers = [];
+    let records = [];
+    let currentBillData = {};
+
+    // --- INITIALIZATION ---
+    function init() {
+        try {
+            // Load data from LocalStorage
+            const storedWorkers = localStorage.getItem('svle_workers_v2');
+            const storedRecords = localStorage.getItem('svle_records_v2');
+            
+            if(storedWorkers) workers = JSON.parse(storedWorkers);
+            if(storedRecords) records = JSON.parse(storedRecords);
+
+            // Set Today's Date
+            document.getElementById('entryDate').valueAsDate = new Date();
+
+            // Render UI
+            renderWorkerList();
+            renderHajariForm();
+            renderCalcDropdown();
+            renderTable();
+        } catch (e) {
+            alert("Data load karne me dikkat aayi. Resetting...");
+            console.error(e);
+        }
+    }
+
+    // --- 1. DISPLAY LOGIC ---
+    function toggleDisplay(id) {
+        var el = document.getElementById(id);
+        if (el.style.display === "none") {
+            el.style.display = "block";
+        } else {
+            el.style.display = "none";
+        }
+    }
+
+    // --- 2. WORKER LOGIC ---
+    function addNewWorker() {
+        var name = document.getElementById('wName').value;
+        var type = document.getElementById('wType').value;
+        var rate = document.getElementById('wRate').value;
+
+        if(!name) { alert("Naam likhna jaruri hai"); return; }
+
+        var newWorker = {
+            id: Date.now(),
+            name: name,
+            type: type,
+            rate: rate || 0
+        };
+
+        workers.push(newWorker);
+        saveData();
+        
+        // Reset Inputs
+        document.getElementById('wName').value = "";
+        document.getElementById('wRate').value = "";
+        
+        renderWorkerList();
+        renderHajariForm();
+        renderCalcDropdown();
+        alert("Worker Added!");
+    }
+
+    function deleteWorker(id) {
+        if(confirm("Delete this worker?")) {
+            workers = workers.filter(w => w.id !== id);
+            saveData();
+            renderWorkerList();
+            renderHajariForm();
+            renderCalcDropdown();
+        }
+    }
+
+    function renderWorkerList() {
+        var list = document.getElementById('workerListUL');
+        list.innerHTML = "";
+        workers.forEach(w => {
+            list.innerHTML += `<li>${w.name} (${w.type}) - ₹${w.rate} <span style="color:red; cursor:pointer;" onclick="deleteWorker(${w.id})">[X]</span></li>`;
+        });
+    }
+
+    // --- 3. PHOTO LOGIC ---
+    function handlePhoto(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                document.getElementById('photoBase64').value = e.target.result;
+                document.getElementById('photoPreview').src = e.target.result;
+                document.getElementById('photoPreview').style.display = 'block';
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // --- 4. RECORD SAVING ---
+    function renderHajariForm() {
+        var div = document.getElementById('hajariListArea');
+        div.innerHTML = "";
+        if(workers.length === 0) {
+            div.innerHTML = "<p>Koi worker nahi hai. Pehle worker add karein.</p>";
+            return;
+        }
+
+        workers.forEach(w => {
+            div.innerHTML += `
+                <div class="worker-row">
+                    <span>${w.name} <small>(${w.type})</small></span>
+                    <input type="number" step="0.5" id="att_${w.id}" placeholder="0">
+                </div>
+            `;
+        });
+    }
+
+    function saveRecord() {
+        var date = document.getElementById('entryDate').value;
+        var site = document.getElementById('siteName').value;
+        
+        if(!date || !site) { alert("Date aur Site Name bharna jaruri hai"); return; }
+
+        var attendance = [];
+        var totalPay = 0;
+
+        workers.forEach(w => {
+            var inp = document.getElementById('att_' + w.id);
+            if(inp && inp.value > 0) {
+                var val = parseFloat(inp.value);
+                var pay = val * parseFloat(w.rate);
+                attendance.push({ name: w.name, val: val, pay: pay });
+                totalPay += pay;
+            }
+        });
+
+        var newRecord = {
+            id: Date.now(),
+            date: date,
+            site: site,
+            matIn: document.getElementById('matIn').value,
+            matOut: document.getElementById('matOut').value,
+            workDesc: document.getElementById('workDesc').value,
+            photo: document.getElementById('photoBase64').value,
+            attendance: attendance,
+            totalPay: totalPay
+        };
+
+        records.push(newRecord);
+        saveData();
+        renderTable();
+
+        // Clear Form
+        document.getElementById('matIn').value = "";
+        document.getElementById('matOut').value = "";
+        document.getElementById('workDesc').value = "";
+        document.getElementById('photoBase64').value = "";
+        document.getElementById('photoInput').value = "";
+        document.getElementById('photoPreview').style.display = "none";
+        workers.forEach(w => {
+            var inp = document.getElementById('att_' + w.id);
+            if(inp) inp.value = "";
+        });
+
+        alert("Record Save Ho Gaya!");
+    }
+
+    // --- 5. CALCULATOR ---
+    function renderCalcDropdown() {
+        var sel = document.getElementById('calcWorkerSelect');
+        sel.innerHTML = '<option value="">Worker Select Karein...</option>';
+        workers.forEach(w => {
+            sel.innerHTML += `<option value="${w.name}">${w.name}</option>`;
+        });
+    }
+
+    function doCalculation() {
+        var name = document.getElementById('calcWorkerSelect').value;
+        var from = document.getElementById('calcFrom').value;
+        var to = document.getElementById('calcTo').value;
+
+        if(!name) { alert("Please select a worker"); return; }
+
+        var tHajari = 0;
+        var tMoney = 0;
+
+        records.forEach(r => {
+            if(from && r.date < from) return;
+            if(to && r.date > to) return;
+
+            var entry = r.attendance.find(a => a.name === name);
+            if(entry) {
+                tHajari += entry.val;
+                tMoney += entry.pay;
+            }
+        });
+
+        document.getElementById('resName').innerText = name;
+        document.getElementById('resRange').innerText = (from || "Start") + " to " + (to || "End");
+        document.getElementById('resHajari').innerText = tHajari;
+        document.getElementById('resMoney').innerText = tMoney;
+        document.getElementById('calcResult').style.display = "block";
+
+        currentBillData = {
+            name: name,
+            range: (from || "Start") + " to " + (to || "End"),
+            hajari: tHajari,
+            money: tMoney
+        };
+    }
+
+    // --- 6. BILL SYSTEM ---
+    function openBill() {
+        if(!currentBillData.name) return;
+        
+        document.getElementById('mainApp').style.display = 'none';
+        document.getElementById('billSystem').style.display = 'block';
+
+        document.getElementById('billName').innerText = currentBillData.name;
+        document.getElementById('billDate').innerText = new Date().toLocaleDateString();
+        document.getElementById('billRange').innerText = currentBillData.range;
+        document.getElementById('billHajari').innerText = currentBillData.hajari;
+        document.getElementById('billAmt').innerText = currentBillData.money;
+    }
+
+    function closeBill() {
+        document.getElementById('billSystem').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'block';
+    }
+
+    // --- 7. TABLE DISPLAY ---
+    function renderTable() {
+        var tbody = document.getElementById('tableBody');
+        tbody.innerHTML = "";
+        
+        // Sort by Date (Newest first)
+        records.sort((a,b) => new Date(b.date) - new Date(a.date));
+
+        records.forEach(r => {
+            var workerTxt = "";
+            r.attendance.forEach(a => {
+                workerTxt += `<div>${a.name}: ${a.val} (${a.pay})</div>`;
+            });
+
+            var photoHtml = r.photo ? `<br><img src="${r.photo}" style="height:40px;">` : "";
+
+            tbody.innerHTML += `
+                <tr>
+                    <td><b>${r.date}</b><br>${r.site}</td>
+                    <td>
+                        IN: ${r.matIn}<br>
+                        OUT: ${r.matOut}<br>
+                        Work: ${r.workDesc}
+                        ${photoHtml}
+                    </td>
+                    <td>${workerTxt}<hr>Total: <b>₹${r.totalPay}</b></td>
+                    <td><button class="btn-red" onclick="deleteRecord(${r.id})">Del</button></td>
+                </tr>
+            `;
+        });
+    }
+
+    function deleteRecord(id) {
+        if(confirm("Delete permanently?")) {
+            records = records.filter(r => r.id !== id);
+            saveData();
+            renderTable();
+        }
+    }
+
+    // --- UTILS ---
+    function saveData() {
+        localStorage.setItem('svle_workers_v2', JSON.stringify(workers));
+        localStorage.setItem('svle_records_v2', JSON.stringify(records));
+    }
+
+    // Start App
+    init();
+
+</script>
+</body>
+</html>
