@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVL Enterprises - Khata Book</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root { --primary-color: #dc3545; --secondary-color: #198754; --accent-color: #6f42c1; }
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', Arial, sans-serif; padding-bottom: 50px; }
+        .app-container { max-width: 700px; margin: auto; background: white; min-height: 100vh; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        
+        .header { background: var(--primary-color); color: white; text-align: center; padding: 20px; border-bottom: 5px solid #a71d2a; }
+        .header h1 { font-size: 22px; font-weight: 800; margin: 0; }
+        .header p { margin: 5px 0 0; font-size: 14px; opacity: 0.9; }
+
+        .card-box { border: 1px solid #ddd; border-radius: 10px; padding: 15px; margin: 15px; background: #fff; }
+        .title-red { color: var(--primary-color); font-weight: 700; border-bottom: 2px solid #f8d7da; margin-bottom: 15px; }
+        .title-green { color: var(--secondary-color); font-weight: 700; border-bottom: 2px solid #d1e7dd; margin-bottom: 15px; }
+        .title-purple { color: var(--accent-color); font-weight: 700; border-bottom: 2px solid #e2d9f3; margin-bottom: 15px; }
+
+        .btn-full { width: 100%; font-weight: bold; margin-bottom: 10px; border-radius: 8px; padding: 10px; }
+        .worker-row { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 5px; background: #f9f9f9; padding: 8px; border-radius: 5px; margin-bottom: 5px; align-items: center; border-left: 4px solid #0d6efd; }
+        
+        .img-preview { width: 100%; max-height: 200px; object-fit: contain; display: none; margin-top: 10px; border: 1px dashed #ccc; padding: 5px; }
+        .record-img { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; cursor: pointer; }
+        
+        .bill-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; padding: 10px; }
+        .bill-content { background: white; width: 100%; max-width: 450px; padding: 20px; border-radius: 12px; max-height: 90vh; overflow-y: auto; }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; }
+            .app-container { box-shadow: none; max-width: 100%; }
+            .bill-modal { position: relative; display: block; background: white; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container" id="mainApp">
+    <div class="header">
+        <h1>Shree Vaibhav Laxmi Enterprises</h1>
+        <p>Supervisor: Siddharth Yadav | Worker Khata Book</p>
+    </div>
+
+    <div class="p-3">
+        <button class="btn btn-primary btn-full no-print" onclick="openWorkerMgmt()">+ Worker Add (Mistri/Labour)</button>
+    </div>
+
+    <div class="card-box">
+        <h5 class="title-green">1. Daily Entry (रोज़ का काम)</h5>
+        <input type="date" id="workDate" class="form-control mb-2">
+        <input type="text" id="siteName" class="form-control mb-2" placeholder="Site Name (e.g. Gupta Ji)">
+        
+        <div class="mb-3">
+            <label class="fw-bold small">Attendance & Daily Advance:</label>
+            <div id="attendanceList" class="small text-muted">No workers added.</div>
+        </div>
+
+        <div class="row g-2 mb-2">
+            <div class="col-6"><input type="text" id="maalIn" class="form-control" placeholder="Maal Aaya (IN)"></div>
+            <div class="col-6"><input type="text" id="maalOut" class="form-control" placeholder="Maal Laga (OUT)"></div>
+        </div>
+        <textarea id="workDesc" class="form-control mb-2" placeholder="Work Description..."></textarea>
+        
+        <label class="small fw-bold">Site Photo:</label>
+        <input type="file" id="photoInput" class="form-control mb-2" accept="image/*" onchange="previewImg(this)">
+        <img id="imgPreview" class="img-preview" src="#">
+
+        <button class="btn btn-success btn-full" onclick="saveDailyRecord()">Save Daily Record</button>
+    </div>
+
+    <div class="card-box">
+        <h5 class="title-red">2. Payment Entry (पैसा दिया)</h5>
+        <p class="small text-muted">Agar aaj kisi worker ko payment kiya hai, to yahan add karein.</p>
+        <select id="payWorker" class="form-select mb-2"></select>
+        <div class="row g-2 mb-2">
+            <div class="col-6"><input type="date" id="payDate" class="form-control"></div>
+            <div class="col-6"><input type="number" id="payAmount" class="form-control" placeholder="Amount Paid (₹)"></div>
+        </div>
+        <button class="btn btn-danger btn-full" onclick="savePayment()">Save Payment Info</button>
+    </div>
+
+    <div class="card-box no-print">
+        <h5 class="title-purple">Monthly Track Report</h5>
+        <select id="reportMonth" class="form-select mb-2" onchange="renderMonthlyReport()">
+            <option value="current">Current Month</option>
+            <option value="last">Last Month</option>
+        </select>
+        <div id="monthlyStats" class="p-2 bg-light border rounded small"></div>
+    </div>
+
+    <div class="card-box">
+        <h5 class="title-purple">3. Generate Bill (Check Balance)</h5>
+        <select id="billWorker" class="form-select mb-2"></select>
+        <button class="btn btn-dark btn-full" onclick="generateStatement()">Generate Statement (Hisab)</button>
+    </div>
+
+    <div class="card-box">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="m-0">Saved Records</h5>
+            <button class="btn btn-sm btn-outline-primary no-print" onclick="window.print()">Print Full Report</button>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered" style="font-size: 12px;">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Date/Site</th>
+                        <th>Work</th>
+                        <th>Payment</th>
+                        <th class="no-print">X</th>
+                    </tr>
+                </thead>
+                <tbody id="recordsTable"></tbody>
+            </table>
+        </div>
+        <button class="btn btn-outline-danger btn-sm w-100 mt-3 no-print" onclick="resetData()">⚠️ Reset All Data</button>
+    </div>
+</div>
+
+<div id="billModal" class="bill-modal">
+    <div class="bill-content" id="printableBill">
+        <div class="text-center border-bottom pb-2">
+            <h5 class="m-0">SVL Enterprises</h5>
+            <p class="small m-0">Statement: Siddharth Yadav</p>
+        </div>
+        <div id="billData" class="mt-3"></div>
+        <div class="d-flex gap-2 mt-4 no-print">
+            <button class="btn btn-primary w-100" onclick="window.print()">Print / PDF</button>
+            <button class="btn btn-secondary w-100" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="workerMgmtModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5>Manage Workers</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <div class="input-group mb-3">
+                    <input type="text" id="wName" class="form-control" placeholder="Name">
+                    <input type="number" id="wRate" class="form-control" placeholder="Rate" style="max-width: 80px;">
+                    <button class="btn btn-primary" onclick="addWorker()">Add</button>
+                </div>
+                <ul id="workerList" class="list-group"></ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let workers = JSON.parse(localStorage.getItem('svl_workers')) || [];
+    let records = JSON.parse(localStorage.getItem('svl_records')) || [];
+
+    const mgmtModal = new bootstrap.Modal(document.getElementById('workerMgmtModal'));
+
+    function init() {
+        document.getElementById('workDate').valueAsDate = new Date();
+        document.getElementById('payDate').valueAsDate = new Date();
+        renderUI();
+    }
+
+    function addWorker() {
+        const name = document.getElementById('wName').value;
+        const rate = document.getElementById('wRate').value;
+        if (name && rate) {
+            workers.push({ id: Date.now(), name, rate: parseFloat(rate) });
+            save();
+            renderUI();
+            document.getElementById('wName').value = '';
+            document.getElementById('wRate').value = '';
+        }
+    }
+
+    function removeWorker(id) {
+        workers = workers.filter(w => w.id !== id);
+        save();
+        renderUI();
+    }
+
+    function previewImg(input) {
+        const preview = document.getElementById('imgPreview');
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = e => { preview.src = e.target.result; preview.style.display = 'block'; };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function saveDailyRecord() {
+        const site = document.getElementById('siteName').value;
+        if (!site) return alert("Enter Site Name");
+
+        const dayWorkers = [];
+        document.querySelectorAll('.worker-row').forEach(row => {
+            const id = row.dataset.id;
+            const hajari = row.querySelector('.hajari').value;
+            const adv = row.querySelector('.adv').value;
+            if (hajari > 0 || adv > 0) {
+                dayWorkers.push({ id: parseInt(id), hajari: parseFloat(hajari), adv: parseFloat(adv) || 0 });
+            }
+        });
+
+        const record = {
+            id: Date.now(),
+            type: 'WORK',
+            date: document.getElementById('workDate').value,
+            site: site,
+            workers: dayWorkers,
+            maalIn: document.getElementById('maalIn').value,
+            maalOut: document.getElementById('maalOut').value,
+            desc: document.getElementById('workDesc').value,
+            img: document.getElementById('imgPreview').src
+        };
+
+        records.push(record);
+        save();
+        renderUI();
+        alert("Record Saved!");
+    }
+
+    function savePayment() {
+        const workerId = document.getElementById('payWorker').value;
+        const amount = document.getElementById('payAmount').value;
+        if (!workerId || !amount) return alert("Select worker and amount");
+
+        records.push({
+            id: Date.now(),
+            type: 'PAYMENT',
+            date: document.getElementById('payDate').value,
+            workerId: parseInt(workerId),
+            amount: parseFloat(amount)
+        });
+        save();
+        renderUI();
+        document.getElementById('payAmount').value = '';
+    }
+
+    function generateStatement() {
+        const wid = parseInt(document.getElementById('billWorker').value);
+        if (!wid) return alert("Select worker");
+        const worker = workers.find(w => w.id === wid);
+        
+        let totalHajari = 0, totalWage = 0, totalAdv = 0, totalPay = 0;
+        let detailsHtml = '<table class="table table-sm border" style="font-size:11px;"><tr><th>Date</th><th>Day</th><th>Amt</th></tr>';
+
+        records.forEach(r => {
+            if (r.type === 'WORK') {
+                const w = r.workers.find(idx => idx.id === wid);
+                if (w) {
+                    const amt = w.hajari * worker.rate;
+                    totalHajari += w.hajari;
+                    totalWage += amt;
+                    totalAdv += w.adv;
+                    detailsHtml += `<tr><td>${r.date}</td><td>${w.hajari}</td><td>${amt}</td></tr>`;
+                }
+            } else if (r.type === 'PAYMENT' && r.workerId === wid) {
+                totalPay += r.amount;
+                detailsHtml += `<tr class="table-warning"><td>${r.date}</td><td>PAY</td><td>-${r.amount}</td></tr>`;
+            }
+        });
+
+        const balance = totalWage - totalAdv - totalPay;
+        document.getElementById('billData').innerHTML = `
+            <h6>Worker: ${worker.name} (Rate: ${worker.rate})</h6>
+            <div class="bg-light p-2 rounded mb-2 small">
+                Total Days: <b>${totalHajari}</b> | Earnings: <b>₹${totalWage}</b><br>
+                Total Adv/Tea: <b>₹${totalAdv}</b> | Cash Paid: <b>₹${totalPay}</b>
+            </div>
+            <h5 class="text-danger">Balance Due: ₹${balance}</h5>
+            ${detailsHtml}</table>
+        `;
+        document.getElementById('billModal').style.display = 'flex';
+    }
+
+    function renderMonthlyReport() {
+        const now = new Date();
+        const stats = document.getElementById('monthlyStats');
+        const range = document.getElementById('reportMonth').value;
+        
+        const filtered = records.filter(r => {
+            const d = new Date(r.date);
+            return range === 'current' ? (d.getMonth() === now.getMonth()) : (d.getMonth() === now.getMonth() - 1);
+        });
+
+        let totalPay = 0, workDays = filtered.filter(x => x.type === 'WORK').length;
+        filtered.forEach(r => { if(r.type === 'PAYMENT') totalPay += r.amount; });
+
+        stats.innerHTML = `
+            Days Worked: <b>${workDays}</b><br>
+            Total Cash Distributed: <b>₹${totalPay}</b><br>
+            Materials Recorded: <b>${filtered.filter(x => x.maalIn).length} Entries</b>
+        `;
+    }
+
+    function renderUI() {
+        const list = document.getElementById('attendanceList');
+        const table = document.getElementById('recordsTable');
+        const paySel = document.getElementById('payWorker');
+        const billSel = document.getElementById('billWorker');
+        const wList = document.getElementById('workerList');
+
+        list.innerHTML = ''; paySel.innerHTML = '<option value="">Select...</option>';
+        billSel.innerHTML = '<option value="">Select...</option>'; wList.innerHTML = '';
+        
+        workers.forEach(w => {
+            list.innerHTML += `
+                <div class="worker-row" data-id="${w.id}">
+                    <span>${w.name}</span>
+                    <input type="number" step="0.5" class="form-control form-control-sm hajari" placeholder="Day">
+                    <input type="number" class="form-control form-control-sm adv" placeholder="Adv">
+                </div>`;
+            paySel.innerHTML += `<option value="${w.id}">${w.name}</option>`;
+            billSel.innerHTML += `<option value="${w.id}">${w.name}</option>`;
+            wList.innerHTML += `<li class="list-group-item d-flex justify-content-between p-2">
+                ${w.name} (₹${w.rate}) <button class="btn btn-sm btn-danger" onclick="removeWorker(${w.id})">x</button>
+            </li>`;
+        });
+
+        table.innerHTML = '';
+        records.slice().reverse().forEach(r => {
+            if (r.type === 'WORK') {
+                const img = r.img.length > 50 ? `<img src="${r.img}" class="record-img" onclick="viewImg('${r.img}')">` : '';
+                table.innerHTML += `<tr>
+                    <td>${r.date}<br><b>${r.site}</b></td>
+                    <td>${r.workers.length} Workers<br>${r.desc.substring(0,15)}...<br>${img}</td>
+                    <td>IN: ${r.maalIn}<br>OUT: ${r.maalOut}</td>
+                    <td class="no-print"><button class="btn btn-sm text-danger" onclick="delRec(${r.id})">×</button></td>
+                </tr>`;
+            } else {
+                const w = workers.find(x => x.id === r.workerId);
+                table.innerHTML += `<tr class="table-warning">
+                    <td>${r.date}</td><td>CASH PAYMENT</td><td><b>₹${r.amount}</b><br>${w ? w.name : 'Unknown'}</td>
+                    <td class="no-print"><button class="btn btn-sm text-danger" onclick="delRec(${r.id})">×</button></td>
+                </tr>`;
+            }
+        });
+        renderMonthlyReport();
+    }
+
+    function openWorkerMgmt() { mgmtModal.show(); }
+    function closeModal() { document.getElementById('billModal').style.display = 'none'; }
+    function viewImg(src) { window.open().document.write(`<img src="${src}" style="width:100%">`); }
+    function delRec(id) { if(confirm("Delete?")) { records = records.filter(r => r.id !== id); save(); renderUI(); } }
+    function resetData() { if(confirm("Format All Data?")) { localStorage.clear(); location.reload(); } }
+    function save() { 
+        localStorage.setItem('svl_workers', JSON.stringify(workers)); 
+        localStorage.setItem('svl_records', JSON.stringify(records)); 
+    }
+
+    init();
+</script>
+</body>
+</html>
